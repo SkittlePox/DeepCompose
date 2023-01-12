@@ -43,10 +43,11 @@ Example rule:
 def R1a_test(a, b):
     return a.syntax.slash == SyntacticSlash.R and a.syntax.rhs == b.syntax
 
+
 def R1a_operate(a, b):
     new_english = f"{a.english} {b.english}"
     new_category = a.category.lhs
-    new_semantics = a.semantics(b.semantics)
+    new_semantics = a.semantic_id(b.semantic_id)
     return LexicalEntry(english=new_english, syntacticCategory=new_category, semanticEntry=new_semantics)
 ```
 

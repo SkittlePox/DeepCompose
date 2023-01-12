@@ -10,22 +10,22 @@ class LexicalEntry:
     <[sound], syntax category, [[semantic meaning]]>
     """
 
-    def __init__(self, english, syntacticEntry, semanticEntry, id=-1):
+    def __init__(self, english, syntax_entry, semantic_entry, id=-1):
         """
         english is a string that represents the [sound] of the expression, like 'walks'
-        syntacticEntry is a SyantacticCategory from Syntax.py
-        semanticEntry is a SemanticEntry from Semantics.py
+        syntax_entry is a SyantacticCategory from Syntax.py
+        semantic_entry is a SemanticEntry from Semantics.py
         """
         self.english = english
-        self.syntax = syntacticEntry
-        self.semantics = semanticEntry
+        self.syntax = syntax_entry
+        self.semantics = semantic_entry
         self.id = id
 
     def __eq__(self, other):
         return isinstance(other, LexicalEntry) \
                and self.english == other.english \
-               and self.syntax == other.syntax
-        # and self.semantics.type == other.semantics.type #and self.semantics.function == other.semantics.function
+               and self.syntax == other.syntax \
+               and self.semantics == other.semantics
 
     def __str__(self):
         syntax = str(self.syntax)
@@ -36,4 +36,4 @@ class LexicalEntry:
             return f"<\"{self.english}\";{syntax};{semantics}>"
 
     def __hash__(self):
-        return hash(self.english)  # LOL easy way out
+        return hash(self.english + str(self.semantics))

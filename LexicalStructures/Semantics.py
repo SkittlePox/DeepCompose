@@ -140,13 +140,14 @@ class SemanticIntention:
 #########################
 
 class SemanticEntry:
-    def __init__(self, intention=None, extension=None, type=None):
+    def __init__(self, id, intension=None, extension=None, semantic_type=None):
         """
         Takes a SemanticIntention, SemanticExtension, and SemanticType
         """
-        self.intention = intention
+        self.id = id
+        self.intension = intension
         self.extension = extension
-        self.type = type
+        self.semantic_type = semantic_type
 
     def update(self, new_entries):
         """
@@ -155,22 +156,24 @@ class SemanticEntry:
         self.extension.update(new_entries)
 
     def complexity(self):
-        return self.type.complexity()
+        return self.semantic_type.complexity()
 
     def __call__(self, argument):
         """
         argument is another SemanticEntry
         """
-        intention = self.intention(argument.intention)
-        extension = self.extension(argument.extension)
-        type = self.type(argument.type)
-        return SemanticEntry(intention=intention, extension=extension, type=type)
+        intension = None if self.intension is None else self.intension(argument.intension)
+        extension = None if self.extension is None else self.extension(argument.extension)
+        semantic_type = self.semantic_type(argument.semantic_type)
+        return SemanticEntry(id=f"{self.id}({argument.id})", intension=intension, extension=extension, semantic_type=semantic_type)
 
     def __str__(self):
         baseStr = ""
-        baseStr += str(self.type)
+        baseStr += str(self.semantic_type)
         baseStr += " ; "
-        baseStr += str(self.intention)
-        baseStr += " ; "
-        baseStr += str(self.extension)
+        baseStr += str(self.id)
+        # baseStr += " ; "
+        # baseStr += str(self.intension)
+        # baseStr += " ; "
+        # baseStr += str(self.extension)
         return baseStr

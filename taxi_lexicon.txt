@@ -1,0 +1,3 @@
+Taxi ; NP ; e ; taxi
+Passenger ; NP ; e ; passenger
+is touching north ; S/NP ; <e,t> ; touching_north'

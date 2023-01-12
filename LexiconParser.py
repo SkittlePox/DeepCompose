@@ -146,11 +146,13 @@ class LexiconParser:
         entryArray = entry.split(" ; ")
         english = entryArray[0]
         category = self.parse_syntactic_category(entryArray[1])
-        type = self.parse_semantic_type(entryArray[2])
-        extension = LambdaCalcExpression(self.parse_semantic_extension(entryArray[3]))
-        intention = self.parse_semantic_intention(extension, english)
-        entry = SemanticEntry(extension=extension, intention=intention, type=type)
-        return LexicalEntry(english, category, entry)
+        semantic_type = self.parse_semantic_type(entryArray[2])
+        semantic_id = entryArray[3]
+        semantics = SemanticEntry(semantic_id, semantic_type=semantic_type)
+        # extension = LambdaCalcExpression(self.parse_semantic_extension(entryArray[3]))
+        # intention = self.parse_semantic_intention(extension, english)
+        # entry = SemanticEntry(extension=extension, intention=intention, type=type)
+        return LexicalEntry(english, category, semantics)
 
     def parse_file(self, filename):
         """

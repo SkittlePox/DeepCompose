@@ -14,7 +14,7 @@ def R1a_operate(a, b):
     new_english = f"{a.english} {b.english}"
     new_category = a.syntax.lhs
     new_semantics = a.semantics(b.semantics)
-    return LexicalEntry(english=new_english, syntacticEntry=new_category, semanticEntry=new_semantics)
+    return LexicalEntry(english=new_english, syntax_entry=new_category, semanticEntry=new_semantics)
 
 
 ### R-1b
@@ -27,7 +27,7 @@ def R1b_operate(a, b):
     new_english = f"{a.english} {b.english}"
     new_category = b.syntax.lhs
     new_semantics = b.semantics(a.semantics)
-    return LexicalEntry(english=new_english, syntacticEntry=new_category, semanticEntry=new_semantics)
+    return LexicalEntry(english=new_english, syntax_entry=new_category, semantic_entry=new_semantics)
 
 
 ### R-2         This is a unary rule!
@@ -46,12 +46,12 @@ def R2_operate(a):
 
     def given_P(P):
         def given_x(x):
-            return a.semantics.extension.function(x) and P(x)
+            return a.semantic_id.extension.function(x) and P(x)
 
         return given_x
 
     extension = LambdaCalcExpression(given_P)
-    intention = SemanticIntention(argument=f"{str(a.semantics.intention)} - nmod")
+    intention = SemanticIntention(argument=f"{str(a.semantics.intension)} - nmod")
     type = parser.parse_semantic_type("<e,<e,<e,t>>>")
-    new_semantics = SemanticEntry(intention=intention, extension=extension, type=type)
-    return LexicalEntry(english=a.english, syntacticEntry=new_category, semanticEntry=new_semantics)
+    new_semantics = SemanticEntry(intension=intention, extension=extension, semantic_type=type)
+    return LexicalEntry(english=a.english, syntax_entry=new_category, semanticEntry=new_semantics)

@@ -5,6 +5,18 @@ from GrammarInteractor import *
 from SymbolicStructures import *
 
 
+def taxi_example():
+    lexParser = LexiconParser()
+    entries = lexParser.parse_file("taxi_lexicon.txt")
+    lexicon = Lexicon(list(set(entries)))
+    print(lexicon)
+    grammar = Grammar()
+    interactor = GrammarInteractor(grammar)
+    interactor.populate_lexicon(lexicon, layers=1)
+    print("After populating:")
+    print(lexicon)
+
+
 def main():
     lexParser = LexiconParser()
     entries = lexParser.parse_file("lexicon.txt")
@@ -53,9 +65,9 @@ def example_lexicalTree():
 
     # likes == m=(m=1 p=1) p=(m=0 p=1) z=(m=0)
     # let's add something to make zlptree evaluate to a value
-    print(likes.semantics)
-    likes.semantics.update({"p": {"z": "1"}})
-    print(likes.semantics)
+    print(likes.semantic_id)
+    likes.semantic_id.update({"p": {"z": "1"}})
+    print(likes.semantic_id)
     print("This should now evaluate to 1:")
     print(zlptree.evaluate())  # Now this evaluates to 1
 
@@ -102,7 +114,8 @@ def symbolic_test():
 
 
 if __name__ == "__main__":
-    main()
+    taxi_example()
+    # main()
     # test_parser()
     # example_lexicalTree()
     # grammarTest()
