@@ -1,0 +1,13 @@
+Mitka ; NP ; e ; m
+Porky ; NP ; e ; p
+Zinkly ; NP ; e ; z
+walks ; S/NP ; <e,t> ; m=1 p=0 z=0
+#talks ; S/NP ; <e,t> ; talks'
+likes ; (S/NP)/NP ; <e,<e,t>> ; m=(m=0 p=0) p=(m=1 p=0) z=(m=0)
+#feeds ; (S/NP)/NP ; <e,<e,t>>
+#speak ; (S/NP)/PP[TO] ; <e,<e,t>> ; m=(m=0 p=1 z=0) p=(m=1 p=1 z=0) z=(p=1)
+honest ; S[A]/rNP ; <e,t> ; m=0 p=1 z=1
+#alien ; N ; <e,t> ; m=1 p=0 z=1
+#ball ; N ; e ; fb
+#plays ; (S/NP)/NP ; <e,<e,t>> ; fb=(m=0 p=0 z=1)
+#sport ; N ; e ; fb=1
