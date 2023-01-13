@@ -51,7 +51,7 @@ def R2_operate(a):
         return given_x
 
     extension = LambdaCalcExpression(given_P)
-    intention = SemanticIntention(argument=f"{str(a.semantics.intension)} - nmod")
+    intention = SemanticIntension(argument=f"{str(a.semantics.intension)} - nmod")
     type = parser.parse_semantic_type("<e,<e,<e,t>>>")
     new_semantics = SemanticEntry(intension=intention, extension=extension, semantic_type=type)
     return LexicalEntry(english=a.english, syntax_entry=new_category, semanticEntry=new_semantics)

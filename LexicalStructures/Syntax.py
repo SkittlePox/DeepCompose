@@ -44,7 +44,7 @@ class SyntacticCategory:
         self.features = features
         self.slash = slash
 
-        if slash == None and self.rhs is not None:  # Word order rules
+        if slash is None and self.rhs is not None:  # Word order rules
             if self.lhs.lhs == SyntacticPrimitive.S or self.lhs == self.rhs:
                 self.slash = SyntacticSlash.L
             else:

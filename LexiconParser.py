@@ -134,9 +134,9 @@ class LexiconParser:
         Otherwise a lowercase of english is used
         """
         if isinstance(extension.function, str):
-            return SemanticIntention(argument=extension.function)
+            return SemanticIntension(argument=extension.function)
         else:
-            return SemanticIntention(argument=english.lower() + "'")
+            return SemanticIntension(argument=english.lower() + "'")
 
     def parse_entry(self, entry):
         """

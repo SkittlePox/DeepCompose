@@ -8,11 +8,12 @@ def taxi_example():
     entries = lexParser.parse_file("taxi_lexicon.txt")
     lexicon = Lexicon(list(set(entries)))
     print(lexicon)
-    grammar = Grammar()
-    interactor = GrammarInteractor(grammar)
-    interactor.populate_lexicon(lexicon, layers=1)
-    print("After populating:")
-    print(lexicon)
+    print(entries[2].semantics.semantic_type)
+    # grammar = Grammar()
+    # interactor = GrammarInteractor(grammar)
+    # interactor.populate_lexicon(lexicon, layers=1)
+    # print("After populating:")
+    # print(lexicon)
 
 
 def main():

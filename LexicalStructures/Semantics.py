@@ -110,7 +110,7 @@ class LambdaCalcExpression:
 
 #########################
 
-class SemanticIntention:
+class SemanticIntension:
     def __init__(self, function=None, argument=None):
         """
         Takes a function and argument
@@ -118,7 +118,7 @@ class SemanticIntention:
         function: This might look like 'likes(a)'
         argument: This might look like 'b'
 
-        Together this intention would represent 'likes(a)(b)'
+        Together this intension would represent 'likes(a)(b)'
 
         In the case of a primitive like 'charlie'
         function = None (This should probably be some identity function)
@@ -128,7 +128,7 @@ class SemanticIntention:
         self.argument = argument
 
     def __call__(self, argument):
-        return SemanticIntention(function=self, argument=argument)
+        return SemanticIntension(function=self, argument=argument)
 
     def __str__(self):
         if self.function is None:
