@@ -1,8 +1,6 @@
 from LexicalStructures import *
 from Grammar import *
 from LexiconParser import *
-from GrammarInteractor import *
-from SymbolicStructures import *
 
 
 def taxi_example():
@@ -108,9 +106,6 @@ def semanticTest2():
     l2.expression["p"].update({"z": "0"})
     print(l2("p"))
 
-
-def symbolic_test():
-    pass
 
 
 if __name__ == "__main__":

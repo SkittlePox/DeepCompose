@@ -1,7 +1,7 @@
 from .GrammarRules import *
 
 
-class Rule():
+class Rule:
     def __init__(self, name, test, operate, description=""):
         """
         test takes whole lexical entries and only looks at their syntax
