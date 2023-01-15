@@ -108,37 +108,6 @@ class LambdaCalcExpression:
         return self.function(argument.expression)
 
 
-#########################
-
-class SemanticIntension:
-    def __init__(self, function=None, argument=None):
-        """
-        Takes a function and argument
-
-        function: This might look like 'likes(a)'
-        argument: This might look like 'b'
-
-        Together this intension would represent 'likes(a)(b)'
-
-        In the case of a primitive like 'charlie'
-        function = None (This should probably be some identity function)
-        argument = 'charlie'
-        """
-        self.function = function
-        self.argument = argument
-
-    def __call__(self, argument):
-        return SemanticIntension(function=self, argument=argument)
-
-    def __str__(self):
-        if self.function is None:
-            return str(self.argument)
-        else:
-            return f"{str(self.function)}({str(self.argument)})"
-
-
-#########################
-
 class SemanticEntry:
     def __init__(self, id, intension=None, extension=None, semantic_type=None):
         """
