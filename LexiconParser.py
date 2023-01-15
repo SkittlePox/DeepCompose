@@ -121,37 +121,24 @@ class LexiconParser:
         if len(tokens) == 1 and "=" not in tokens[0]:
             return tokens[0]
         else:
-            funcDict = {}
+            func_dict = {}
             entries = list(map(to_dict_entry, tokens))
             for e in entries:
-                funcDict.update(e)
-            return funcDict
-
-    def parse_semantic_intention(self, extension, english):
-        """
-        Assigns a name in the semantic space
-        If extension is a name like 'p', it is used
-        Otherwise a lowercase of english is used
-        """
-        if isinstance(extension.function, str):
-            return SemanticIntension(argument=extension.function)
-        else:
-            return SemanticIntension(argument=english.lower() + "'")
+                func_dict.update(e)
+            return func_dict
 
     def parse_entry(self, entry):
         """
         Parses an individual lexical entry in a lexicon file
         The parsing is broken up into syntactic, semantic, etc.
         """
-        entryArray = entry.split(" ; ")
-        english = entryArray[0]
-        category = self.parse_syntactic_category(entryArray[1])
-        semantic_type = self.parse_semantic_type(entryArray[2])
-        semantic_id = entryArray[3]
-        semantics = SemanticEntry(semantic_id, semantic_type=semantic_type)
-        # extension = LambdaCalcExpression(self.parse_semantic_extension(entryArray[3]))
-        # intention = self.parse_semantic_intention(extension, english)
-        # entry = SemanticEntry(extension=extension, intention=intention, type=type)
+        entry_array = entry.split(" ; ")
+        english = entry_array[0]
+        category = self.parse_syntactic_category(entry_array[1])
+        semantic_type = self.parse_semantic_type(entry_array[2])
+        semantic_id = entry_array[3]
+        semantic_intension = SemanticIntension(name=semantic_id, module=spawn_extension_module(semantic_type))
+        semantics = SemanticEntry(semantic_id, intension=semantic_intension, semantic_type=semantic_type)
         return LexicalEntry(english, category, semantics)
 
     def parse_file(self, filename):

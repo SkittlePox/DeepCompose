@@ -37,5 +37,5 @@ class Grammar():
         rules['R-1a'] = (
             CombinatoryRule(name="R-1a", test=R1a_test, operate=R1a_operate, description="Some description here"))
         rules['R-1b'] = (CombinatoryRule(name="R-1b", test=R1b_test, operate=R1b_operate))
-        rules['R-2'] = (UnaryRule(name="R-2", test=R2_test, operate=R2_operate))
+        # rules['R-2'] = (UnaryRule(name="R-2", test=R2_test, operate=R2_operate))
         self.rules = rules

@@ -56,7 +56,7 @@ class ExtensionModule(nn.Module):
         return self.intension(state)
 
 
-class SemanticPrimitive(nn.Module):
+class SemanticIntension(nn.Module):
     def __init__(self, name, module):
         super().__init__()
         self.name = name
@@ -66,10 +66,10 @@ class SemanticPrimitive(nn.Module):
         return self.module.forward(state)
 
     def __str__(self):
-        return self.name
+        return f"Intension[{self.name}]"
 
 
-class SemanticIntension(nn.Module):
+class SemanticIntensionApplication(nn.Module):
     def __init__(self, function_module=None, argument_module=None):
         super().__init__()
         self.function_module = function_module
@@ -83,6 +83,13 @@ class SemanticIntension(nn.Module):
 
     def __str__(self):
         return self.name
+
+
+# TODO: Turn this into a generative function
+def spawn_extension_module(semantic_type):
+    semantic_type_str = str(semantic_type)
+    semantic_type_dims_dict = {"e": (32,), "<e,t>": (1, 32), "<e,<e,t>>": (1, 32, 32)}
+    return ExtensionModule(output_dims=semantic_type_dims_dict[semantic_type_str])
 
 
 def main():
@@ -104,5 +111,19 @@ def main():
     print(torch.matmul(torch.matmul(snpnpe, npe), npe))
 
 
+def test():
+    taxi = SemanticIntension(name="taxi", module=ExtensionModule(output_dims=(32,)))
+    touch_n = SemanticIntension(name="touching_north", module=ExtensionModule(output_dims=(1, 32)))
+    taxi_touching_n = SemanticIntensionApplication(function_module=touch_n, argument_module=taxi)
+
+    resize = transforms.Resize(64)
+    image = read_image(f"taxi.png", torchvision.io.ImageReadMode.RGB)
+    image = resize(image).type(torch.float)
+
+    print(taxi_touching_n.forward(image.unsqueeze(0)))
+    print(taxi_touching_n)
+
+
 if __name__ == "__main__":
-    main()
+    # main()
+    test()

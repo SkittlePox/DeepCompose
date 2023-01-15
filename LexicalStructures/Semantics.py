@@ -1,4 +1,5 @@
 import enum
+from .TorchSemantics import *
 
 
 class SemanticTypePrimitive(enum.Enum):
@@ -108,41 +109,36 @@ class LambdaCalcExpression:
         return self.function(argument.expression)
 
 
+#########################
+
 class SemanticEntry:
-    def __init__(self, id, intension=None, extension=None, semantic_type=None):
+    def __init__(self, id, intension=None, semantic_type=None):
         """
-        Takes a SemanticIntention, SemanticExtension, and SemanticType
+        Takes a SemanticIntension and SemanticType
         """
         self.id = id
         self.intension = intension
-        self.extension = extension
         self.semantic_type = semantic_type
-
-    def update(self, new_entries):
-        """
-        This allows for the possibility of re-defining expressions
-        """
-        self.extension.update(new_entries)
 
     def complexity(self):
         return self.semantic_type.complexity()
+
+    def calculate_extension(self, state):
+        return self.intension.forward(state)
 
     def __call__(self, argument):
         """
         argument is another SemanticEntry
         """
-        intension = None if self.intension is None else self.intension(argument.intension)
-        extension = None if self.extension is None else self.extension(argument.extension)
+        intension = SemanticIntensionApplication(function_module=self.intension, argument_module=argument.intension)
         semantic_type = self.semantic_type(argument.semantic_type)
-        return SemanticEntry(id=f"{self.id}({argument.id})", intension=intension, extension=extension, semantic_type=semantic_type)
+        return SemanticEntry(id=f"{self.id}({argument.id})", intension=intension, semantic_type=semantic_type)
 
     def __str__(self):
         baseStr = ""
         baseStr += str(self.semantic_type)
+        # baseStr += " ; "
+        # baseStr += str(self.id)
         baseStr += " ; "
-        baseStr += str(self.id)
-        # baseStr += " ; "
-        # baseStr += str(self.intension)
-        # baseStr += " ; "
-        # baseStr += str(self.extension)
+        baseStr += str(self.intension)
         return baseStr
