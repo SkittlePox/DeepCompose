@@ -140,7 +140,7 @@ class SemanticIntensionApplication(SemanticEntry):
     def forward(self, state):
         function = self.function_module.forward(state)
         argument = self.argument_module.forward(state)
-        return torch.matmul(function, argument)
+        return torch.sigmoid(torch.matmul(function, argument))
 
 
 # TODO: Turn this into a generative function
