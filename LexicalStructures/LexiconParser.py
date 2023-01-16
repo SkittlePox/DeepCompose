@@ -1,4 +1,6 @@
-from LexicalStructures import *
+from .Syntax import *
+from .Semantics import *
+from .LexicalEntry import *
 
 
 class LexiconParser:
@@ -136,9 +138,8 @@ class LexiconParser:
         english = entry_array[0]
         category = self.parse_syntactic_category(entry_array[1])
         semantic_type = self.parse_semantic_type(entry_array[2])
-        semantic_id = entry_array[3]
-        # semantic_intension = SemanticIntensionPrimitive(name=semantic_id, module=spawn_extension_module(semantic_type))
-        semantics = SemanticIntensionPrimitive(name=semantic_id, module=spawn_extension_module(semantic_type), semantic_type=semantic_type)
+        semantics = SemanticIntensionPrimitive(name=entry_array[3], module=spawn_extension_module(semantic_type),
+                                               semantic_type=semantic_type)
         return LexicalEntry(english, category, semantics)
 
     def parse_file(self, filename):

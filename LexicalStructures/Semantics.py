@@ -187,35 +187,3 @@ def test():
 if __name__ == "__main__":
     # main()
     test()
-
-# class SemanticEntryOld:
-#     def __init__(self, semantic_id, intension=None, semantic_type=None):
-#         """
-#         Takes a SemanticIntension and SemanticType
-#         """
-#         self.semantic_id = semantic_id
-#         self.intension = intension
-#         self.semantic_type = semantic_type
-#
-#     def complexity(self):
-#         return self.semantic_type.complexity()
-#
-#     def calculate_extension(self, state):
-#         return self.intension.forward(state)
-#
-#     def __call__(self, argument):
-#         """
-#         argument is another SemanticEntry
-#         """
-#         intension = SemanticIntensionApplication(function_module=self.intension, argument_module=argument.intension)
-#         semantic_type = self.semantic_type(argument.semantic_type)
-#         return SemanticEntry(semantic_id=f"{self.semantic_id}({argument.semantic_id})", intension=intension, semantic_type=semantic_type)
-#
-#     def __str__(self):
-#         baseStr = ""
-#         baseStr += str(self.semantic_type)
-#         # baseStr += " ; "
-#         # baseStr += str(self.id)
-#         baseStr += " ; "
-#         baseStr += str(self.intension)
-#         return baseStr

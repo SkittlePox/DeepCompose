@@ -1,5 +1,4 @@
 from LexicalStructures import *
-from LexiconParser import *
 
 parser = LexiconParser()
 
