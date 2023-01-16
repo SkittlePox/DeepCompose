@@ -8,32 +8,32 @@ class GrammarInteractor():
         self.grammar = grammar
 
     def possible_unaries(self, a):
-        un_rules = list(filter(lambda x: isinstance(x, UnaryRule), self.grammar.rules.values()))
-        rls = []
-        for r in un_rules:
+        unary_rules = list(filter(lambda x: isinstance(x, UnaryRule), self.grammar.rules.values()))
+        applicable_rules = []
+        for r in unary_rules:
             if r.test(a):
-                rls.append(r)
-        return rls
+                applicable_rules.append(r)
+        return applicable_rules
 
     def possible_combinations(self, a, b):
-        co_rules = list(filter(lambda x: isinstance(x, CombinatoryRule), self.grammar.rules.values()))
-        rls = []
-        for r in co_rules:
+        combinatory_rules = list(filter(lambda x: isinstance(x, CombinatoryRule), self.grammar.rules.values()))
+        applicable_rules = []
+        for r in combinatory_rules:
             if r.test(a, b):
-                rls.append(r)
-        return rls
+                applicable_rules.append(r)
+        return applicable_rules
 
     def populate_lexicon(self, lexicon, layers=4):
         for i in range(layers):
             entries = copy.copy(lexicon.entries)
             for a in entries:
-                unaryRules = self.possible_unaries(a)
-                if len(unaryRules) != 0:
-                    un_entries = list(map(lambda x: x(a), unaryRules))
+                unary_rules = self.possible_unaries(a)
+                if len(unary_rules) != 0:
+                    un_entries = list(map(lambda x: x(a), unary_rules))
                     print(un_entries[0])
                     lexicon.add(un_entries)
                 for b in entries:
-                    combinatoryRules = self.possible_combinations(a, b)
-                    if len(combinatoryRules) != 0:
-                        newEntries = list(map(lambda x: x(a, b), combinatoryRules))
-                        lexicon.add(newEntries)
+                    combinatory_rules = self.possible_combinations(a, b)
+                    if len(combinatory_rules) != 0:
+                        new_entries = list(map(lambda x: x(a, b), combinatory_rules))
+                        lexicon.add(new_entries)

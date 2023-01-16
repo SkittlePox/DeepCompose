@@ -8,7 +8,7 @@ class Lexicon:
         self.entries.sort(key=lambda x: len(str(x.syntax)))  # Sorts by complexity
 
         for e in self.entries:
-            e.id = self.new_id
+            e.semantic_id = self.new_id
             self.new_id += 1
 
     def insort(self, entry):
@@ -39,11 +39,11 @@ class Lexicon:
                 return True
         return False
 
-    def getEntry(self, id_or_english):
-        entry = None
+    def get_entry(self, id_or_english):
         for e in self.entries:
-            if e.id == id_or_english or e.english == id_or_english:
+            if e.semantics.semantic_id == id_or_english or e.english == id_or_english:
                 return e
+        return None
 
     def __str__(self):
         out = "=== Lexicon ===\n"

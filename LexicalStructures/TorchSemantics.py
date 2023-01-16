@@ -82,7 +82,7 @@ class SemanticIntensionApplication(nn.Module):
         return torch.matmul(function, argument)
 
     def __str__(self):
-        return self.name
+        return f"Intension[{self.name}]"
 
 
 # TODO: Turn this into a generative function

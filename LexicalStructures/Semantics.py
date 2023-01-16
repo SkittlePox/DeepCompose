@@ -24,7 +24,7 @@ class SemanticType:
         """
         This is for sorting purposes
         """
-        if self.lhs == None:
+        if self.lhs is None:
             return 1
         lhs = 1 if isinstance(self.lhs, SemanticTypePrimitive) else self.lhs.complexity()
         rhs = 1 if isinstance(self.rhs, SemanticTypePrimitive) else self.rhs.complexity()
@@ -34,7 +34,7 @@ class SemanticType:
         return self.rhs
 
     def __str__(self):
-        if self.lhs == None:
+        if self.lhs is None:
             return str(self.rhs)
         else:
             return f"<{str(self.lhs)},{str(self.rhs)}>"
@@ -44,79 +44,12 @@ class SemanticType:
                and self.lhs == other.lhs and self.rhs == other.rhs
 
 
-#########################
-
-class LambdaCalcExpression:
-    def __init__(self, expression):
-        """
-        Expression may be a callable function or a dictionary to be turned into a callable function
-        This class represents a lambda calculus expression, intention
-        """
-
-        def dict_to_func(dictionary):
-            def get_arg(argument):
-                if argument in dictionary:
-                    return LambdaCalcExpression(expression=dictionary[argument])
-                else:
-                    return LambdaCalcExpression(expression={})
-
-            return get_arg
-
-        self.expression = expression
-        if isinstance(self.expression, dict):
-            self.function = dict_to_func(self.expression)
-        else:
-            self.function = self.expression
-
-    def update(self, new_entries):
-        def dict_updater(orig_dict, entries):
-            for key, val in entries.items():
-                if isinstance(val, dict):
-                    dict_updater(orig_dict[key], val)
-                else:
-                    orig_dict.update({key: val})
-
-        dict_updater(self.expression, new_entries)
-
-    def __str__(self):
-        def dict_to_special(dictionary):
-            baseStr = ""
-            for key, value in dictionary.items():
-                if isinstance(value, str):
-                    baseStr += f"{key}={str(value)} "
-                else:
-                    baseStr += f"{key}=({dict_to_special(value)}) "
-            baseStr = baseStr[:-1]
-            return baseStr
-
-        def func_to_special(function):
-            baseStr = ""
-            for arg in self.arguments:
-                baseStr += f"{arg}=({str(function(arg))}) "
-            baseStr = baseStr[:-1]
-            return baseStr
-
-        if isinstance(self.expression, str) or isinstance(self.expression, int):
-            return str(self.expression)
-        elif not self.expression:
-            return "undefined"
-        elif isinstance(self.expression, dict):
-            return dict_to_special(self.expression)
-        else:
-            return "special function"
-
-    def __call__(self, argument):
-        return self.function(argument.expression)
-
-
-#########################
-
 class SemanticEntry:
-    def __init__(self, id, intension=None, semantic_type=None):
+    def __init__(self, semantic_id, intension=None, semantic_type=None):
         """
         Takes a SemanticIntension and SemanticType
         """
-        self.id = id
+        self.semantic_id = semantic_id
         self.intension = intension
         self.semantic_type = semantic_type
 
@@ -132,7 +65,7 @@ class SemanticEntry:
         """
         intension = SemanticIntensionApplication(function_module=self.intension, argument_module=argument.intension)
         semantic_type = self.semantic_type(argument.semantic_type)
-        return SemanticEntry(id=f"{self.id}({argument.id})", intension=intension, semantic_type=semantic_type)
+        return SemanticEntry(semantic_id=f"{self.semantic_id}({argument.semantic_id})", intension=intension, semantic_type=semantic_type)
 
     def __str__(self):
         baseStr = ""
