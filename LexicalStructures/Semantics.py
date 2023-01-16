@@ -143,6 +143,16 @@ class SemanticIntensionApplication(SemanticEntry):
         return torch.sigmoid(torch.matmul(function, argument))
 
 
+class PropositionSetModule(nn.Module):
+    def __init__(self, semantic_intensions):
+        super().__init__()
+        self.semantic_intensions = semantic_intensions
+
+    def forward(self, state):
+        outputs = [prop.forward(state) for prop in self.semantic_intensions]
+        return torch.cat(outputs)
+
+
 # TODO: Turn this into a generative function
 def spawn_extension_module(semantic_type):
     semantic_type_str = str(semantic_type)

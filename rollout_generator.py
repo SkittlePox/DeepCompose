@@ -64,7 +64,8 @@ def generate_rollouts(env, agent, max_steps=1000, min_rollouts=100, save=True):
 env = TaxiEnv(exploring_starts=True,
               terminate_on_goal=True,
               depot_dropoff_only=False,
-              should_render=True)
+              should_render=True,
+              dimensions=TaxiEnv.dimensions_5x5_to_64x64)
 
 expert = TaxiExpert(env)
 
