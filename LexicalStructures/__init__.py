@@ -3,4 +3,3 @@ from .LexicalTree import *
 from .Semantics import *
 from .Syntax import *
 from .Lexicon import *
-from .TorchSemantics import *

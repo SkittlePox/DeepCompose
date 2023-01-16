@@ -13,7 +13,7 @@ def R1a_test(a, b):
 def R1a_operate(a, b):
     new_english = f"{a.english} {b.english}"
     new_category = a.syntax.lhs
-    new_semantics = a.semantics(b.semantics)
+    new_semantics = a.semantics.compose(b.semantics)
     return LexicalEntry(english=new_english, syntax_entry=new_category, semantic_entry=new_semantics)
 
 
@@ -26,7 +26,7 @@ def R1b_test(a, b):
 def R1b_operate(a, b):
     new_english = f"{a.english} {b.english}"
     new_category = b.syntax.lhs
-    new_semantics = b.semantics(a.semantics)
+    new_semantics = b.semantics.compose(a.semantics)
     return LexicalEntry(english=new_english, syntax_entry=new_category, semantic_entry=new_semantics)
 
 

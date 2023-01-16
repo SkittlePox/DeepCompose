@@ -115,7 +115,7 @@ class LexiconParser:
                 return {entry[:equals]: entry[equals + 1:]}
             else:
                 equals = entry.index('=')
-                return {entry[:equals]: self.parse_semantic_extension(entry[equals + 2:-1])}
+                return {entry[:equals]: self.parse_semantic_extension(entry[equals + 2:])}
 
         tokens = tokenize(func)
         if len(tokens) == 1 and "=" not in tokens[0]:
@@ -137,8 +137,8 @@ class LexiconParser:
         category = self.parse_syntactic_category(entry_array[1])
         semantic_type = self.parse_semantic_type(entry_array[2])
         semantic_id = entry_array[3]
-        semantic_intension = SemanticIntension(name=semantic_id, module=spawn_extension_module(semantic_type))
-        semantics = SemanticEntry(semantic_id, intension=semantic_intension, semantic_type=semantic_type)
+        # semantic_intension = SemanticIntensionPrimitive(name=semantic_id, module=spawn_extension_module(semantic_type))
+        semantics = SemanticIntensionPrimitive(name=semantic_id, module=spawn_extension_module(semantic_type), semantic_type=semantic_type)
         return LexicalEntry(english, category, semantics)
 
     def parse_file(self, filename):

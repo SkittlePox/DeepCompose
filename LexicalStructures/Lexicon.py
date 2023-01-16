@@ -41,7 +41,7 @@ class Lexicon:
 
     def get_entry(self, id_or_english):
         for e in self.entries:
-            if e.semantics.semantic_id == id_or_english or e.english == id_or_english:
+            if e.semantics.name == id_or_english or e.english == id_or_english:
                 return e
         return None
 
