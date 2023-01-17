@@ -1,7 +1,7 @@
 from LexicalStructures import *
 from Grammar import *
 from Trainer import *
-from tqdm.auto import tqdm
+from tqdm import tqdm
 import torch.nn as nn
 
 
@@ -16,9 +16,10 @@ def train(model, dataloader, num_epochs, device="cpu"):
     """
 
     # optimizer = torch.optim.RMSprop(model.parameters(), lr=0.01, alpha=0.95)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
     mse_loss = nn.MSELoss()
+    mae_loss = nn.L1Loss()
     model.train()
 
     for epoch in range(num_epochs):
@@ -31,6 +32,8 @@ def train(model, dataloader, num_epochs, device="cpu"):
 
             optimizer.zero_grad()
             pred = model(X)
+            # print(pred.size())
+            # print(y.size())
 
             # loss = nn.functional.nll_loss(pred.transpose(1, 2), y, ignore_index=QUERY_PAD_INDEX)
             loss = mse_loss(pred, y)
@@ -46,6 +49,43 @@ def train(model, dataloader, num_epochs, device="cpu"):
         print(f"Average loss: {average_loss / len(dataloader)}")
 
     return model
+
+
+def evaluate(model, dataloader, device="cpu"):
+    """ Evaluate a PyTorch Model
+
+    :param torch.nn.Module model: the model to be evaluated
+    :param torch.utils.data.DataLoader test_dataloader: DataLoader containing testing examples
+    :param torch.device device: the device that we'll be training on
+
+    :return accuracy
+    """
+
+    model.eval()
+
+    print("Evaluating:")
+
+    progress_bar = tqdm(range(len(dataloader)))
+
+    total_accuracy = None
+
+    for i, batch in enumerate(dataloader):
+        X, y = batch[0].to(device), batch[1].to(device)
+        with torch.no_grad():
+            pred = model(X)
+            pred = (pred > 0.5).float()
+
+        if total_accuracy is None:
+            total_accuracy = torch.sum((pred==y).float(), dim=0)
+        else:
+            total_accuracy += torch.sum((pred==y).float(), dim=0)
+
+        progress_bar.update(1)
+
+    total_accuracy /= len(dataloader.dataset)
+    print(total_accuracy)
+
+    return total_accuracy
 
 
 def taxi_example():
@@ -97,15 +137,17 @@ def learning_propositions():
     # resize = transforms.Resize(64)
     # image = read_image(f"taxi.png", torchvision.io.ImageReadMode.RGB)
     # image = resize(image).type(torch.float)
-    # image = image.unsqueeze(0)
-
+    # image = image.repeat((10, 1, 1, 1))
+    #
     # print(prop_module.forward(image))
 
     file = open('./images/random_states.pkl', 'rb')
     dataset = PropositionDataset(root_dir="./images/random_states/", label_dict=pickle.load(file))
-    dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
+    dataloader = DataLoader(dataset, batch_size=20, shuffle=False)
 
-    train(prop_module, dataloader, num_epochs=1)
+    evaluate(prop_module, dataloader)
+    train(prop_module, dataloader, num_epochs=15)
+    evaluate(prop_module, dataloader)
 
 
 if __name__ == "__main__":

@@ -70,4 +70,4 @@ env = TaxiEnv(exploring_starts=True,
 expert = TaxiExpert(env)
 
 # generate_rollouts(env, expert, min_rollouts=1000)
-generate_random_states(env, num_states=1000)
+generate_random_states(env, num_states=200)
