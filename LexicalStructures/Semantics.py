@@ -60,7 +60,11 @@ class UnFlatten(nn.Module):
         self.dims = dims
 
     def forward(self, x):
-        return x.view(*self.dims)
+        # print(x.size())
+        print(self.dims)
+        out = x.view(*self.dims)
+        print(out.size())
+        return out
 
 
 class ExtensionModule(nn.Module):
@@ -90,7 +94,7 @@ class ExtensionModule(nn.Module):
             nn.Conv2d(128, 256, kernel_size=4, stride=2),
             nn.ReLU(),
             Flatten(),
-            nn.Linear(1024, reduce(lambda x, y: x * y, output_dims)),
+            nn.Linear(1024, abs(reduce(lambda x, y: x * y, output_dims))),
             UnFlatten(dims=output_dims)
         )
 
@@ -140,13 +144,17 @@ class SemanticIntensionApplication(SemanticEntry):
     def forward(self, state):
         function = self.function_module.forward(state)
         argument = self.argument_module.forward(state)
-        return torch.sigmoid(torch.matmul(function, argument))
+        print(function.size())
+        print(argument.size())
+        comp = torch.matmul(function, argument)
+        return torch.sigmoid(comp)
 
 
 class PropositionSetModule(nn.Module):
     def __init__(self, semantic_intensions):
         super().__init__()
         self.semantic_intensions = semantic_intensions
+        [self.add_module(prop.name, prop) for prop in semantic_intensions]
 
     def forward(self, state):
         outputs = [prop.forward(state) for prop in self.semantic_intensions]
@@ -156,7 +164,7 @@ class PropositionSetModule(nn.Module):
 # TODO: Turn this into a generative function
 def spawn_extension_module(semantic_type):
     semantic_type_str = str(semantic_type)
-    semantic_type_dims_dict = {"e": (32,), "<e,t>": (1, 32), "<e,<e,t>>": (1, 32, 32)}
+    semantic_type_dims_dict = {"e": (32,), "<e,t>": (-1, 32), "<e,<e,t>>": (-1, 32, 32)}
     return ExtensionModule(output_dims=semantic_type_dims_dict[semantic_type_str])
 
 
@@ -166,34 +174,42 @@ def main():
     snpnp = ExtensionModule(output_dims=(1, 32, 32))
     resize = transforms.Resize(64)
     image = read_image(f"taxi.png", torchvision.io.ImageReadMode.RGB)
-    print(image.size())
+    # print(image.size())
     image = resize(image).type(torch.float)
-    print(image.size())
-    npe = np.forward(image.unsqueeze(0))
-    snpe = snp.forward(image.unsqueeze(0))
-    print(npe.size())
-    print(snpe.size())
+    image = image.repeat((1, 1, 1, 1))
+    # print(image.size())
+    npe = np.forward(image)
+    snpe = snp.forward(image)
+    print(f"snpe size: {snpe.size()}")
+    print(f"npe size: {npe.size()}")
+
     print(torch.matmul(snpe, npe))
-    snpnpe = snpnp.forward(image.unsqueeze(0))
-    print(snpnpe.size())
+    snpnpe = snpnp.forward(image)
+    print(f"snpnpe size: {snpnpe.size()}")
+    print(npe.size())
+    new_snpe = torch.matmul(snpnpe, npe)
+    print(f"new_snpe size: {new_snpe.size()}")
+    torch.matmul(new_snpe, npe)
     print(torch.matmul(torch.matmul(snpnpe, npe), npe))
 
 
 def test():
     type_e = SemanticTypePrimitive.e
     type_et = SemanticType(lhs=type_e, rhs=SemanticTypePrimitive.t)
-    taxi = SemanticIntensionPrimitive(name="taxi", module=ExtensionModule(output_dims=(32,)), semantic_type=type_e)
-    touch_n = SemanticIntensionPrimitive(name="touching_north", module=ExtensionModule(output_dims=(1, 32)), semantic_type=type_et)
+    taxi = SemanticIntensionPrimitive(name="taxi", module=ExtensionModule(output_dims=(-1, 32, 1)), semantic_type=type_e)
+    touch_n = SemanticIntensionPrimitive(name="touching_north", module=ExtensionModule(output_dims=(-1, 1, 32)), semantic_type=type_et)
     taxi_touching_n = SemanticIntensionApplication(function_module=touch_n, argument_module=taxi)
 
     resize = transforms.Resize(64)
     image = read_image(f"taxi.png", torchvision.io.ImageReadMode.RGB)
     image = resize(image).type(torch.float)
+    image = image.repeat((2, 1, 1, 1))
+    print(image.size())
 
-    print(taxi_touching_n.forward(image.unsqueeze(0)))
+    print(taxi_touching_n.forward(image))
     print(taxi_touching_n)
 
 
 if __name__ == "__main__":
-    # main()
-    test()
+    main()
+    # test()
