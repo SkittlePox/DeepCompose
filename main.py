@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from LexicalStructures import *
 from Grammar import *
 from Trainer import *
@@ -5,7 +6,7 @@ from tqdm import tqdm
 import torch.nn as nn
 
 
-def train(model, dataloader, num_epochs, device="cpu"):
+def train(model, dataloader, num_epochs, plot=True, device="cpu"):
     """
     :param torch.nn.Module model: the model to be trained
     :param torch.utils.data.DataLoader dataloader: DataLoader containing training examples
@@ -15,12 +16,13 @@ def train(model, dataloader, num_epochs, device="cpu"):
     :return torch.nn.Module model
     """
 
-    # optimizer = torch.optim.RMSprop(model.parameters(), lr=0.01, alpha=0.95)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
     mse_loss = nn.MSELoss()
     mae_loss = nn.L1Loss()
     model.train()
+
+    losses = []
 
     for epoch in range(num_epochs):
         print(f"Epoch {epoch + 1} training:")
@@ -47,8 +49,9 @@ def train(model, dataloader, num_epochs, device="cpu"):
             # print(f"Batch loss: {loss}")
 
         print(f"Average loss: {average_loss / len(dataloader)}")
+        losses.append((average_loss / len(dataloader)).detach().numpy())
 
-    return model
+    return model, losses
 
 
 def evaluate(model, dataloader, device="cpu"):
@@ -143,11 +146,19 @@ def learning_propositions():
 
     file = open('./images/random_states.pkl', 'rb')
     dataset = PropositionDataset(root_dir="./images/random_states/", label_dict=pickle.load(file))
-    dataloader = DataLoader(dataset, batch_size=20, shuffle=False)
+    dataloader = DataLoader(dataset, batch_size=40, shuffle=False)
 
     evaluate(prop_module, dataloader)
-    train(prop_module, dataloader, num_epochs=15)
+    _, losses = train(prop_module, dataloader, num_epochs=10)
     evaluate(prop_module, dataloader)
+
+    plt.plot(losses)
+    plt.xlabel('Iteration')
+    plt.ylabel('Loss')
+    plt.title('Training Loss')
+    plt.show()
+
+    torch.save(prop_module.state_dict(), 'propositions.torch')
 
 
 if __name__ == "__main__":

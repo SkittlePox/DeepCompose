@@ -161,7 +161,6 @@ class SemanticIntensionApplication(SemanticEntry):
         return torch.sigmoid(comp)
 
 
-
 class PropositionSetModule(nn.Module):
     def __init__(self, semantic_intensions):
         super().__init__()
