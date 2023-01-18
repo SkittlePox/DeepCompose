@@ -6,9 +6,9 @@ from visgrid.agents.expert import TaxiExpert
 
 
 def save_rollouts(images, marker):
-    os.mkdir(f"./images/agent-{marker}")
+    os.mkdir(f"../images/agent-{marker}")
     for i in range(len(images)):
-        plt.imsave(f"./images/agent-{marker}/{i}.png", images[i])
+        plt.imsave(f"../images/agent-{marker}/{i}.png", images[i])
 
 
 def generate_random_states(env, num_states, save=True):
@@ -23,9 +23,9 @@ def generate_random_states(env, num_states, save=True):
         all_oo_states[f"state-{i}"] = oo_state
 
         if save:
-            plt.imsave(f"./images/random_states/state-{i}.png", ob)
+            plt.imsave(f"../images/random_states/state-{i}.png", ob)
     if save:
-        file = open('./images/random_states.pkl', 'wb')
+        file = open('../images/random_states.pkl', 'wb')
         pickle.dump(all_oo_states, file)
 
 

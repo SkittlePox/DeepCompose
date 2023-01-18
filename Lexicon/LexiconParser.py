@@ -1,6 +1,6 @@
 from .Syntax import *
 from .Semantics import *
-from .LexicalEntry import *
+from .LexicalStructures import *
 
 
 class LexiconParser:

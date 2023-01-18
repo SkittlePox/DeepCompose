@@ -1,9 +1,8 @@
-from itertools import compress
-import copy
+from copy import copy
 from Grammar import *
 
 
-class GrammarInteractor():
+class LexiconExpander:
     def __init__(self, grammar):
         self.grammar = grammar
 
@@ -25,7 +24,7 @@ class GrammarInteractor():
 
     def populate_lexicon(self, lexicon, layers=4):
         for i in range(layers):
-            entries = copy.copy(lexicon.entries)
+            entries = copy(lexicon.entries)
             for a in entries:
                 unary_rules = self.possible_unaries(a)
                 if len(unary_rules) != 0:
