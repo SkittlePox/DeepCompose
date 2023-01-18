@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
+import torch.utils.data
+
 from Lexicon import *
+from Lexicon import Semantics
 from Grammar import *
 from utils import *
 from tqdm import tqdm
@@ -115,7 +118,7 @@ def taxi_example():
     print(lexicon.get_entry("inside").semantics.forward(image))
 
 
-def learning_propositions():
+def learning_propositions(epochs=20, batch_size=40, save=False):
     lex_parser = LexiconParser()
     entries = lex_parser.parse_file("taxi_lexicon.txt")
     lexicon = Lexicon(list(set(entries)))
@@ -146,20 +149,46 @@ def learning_propositions():
 
     file = open('./images/random_states.pkl', 'rb')
     dataset = PropositionDataset(root_dir="./images/random_states/", label_dict=pickle.load(file))
-    dataloader = DataLoader(dataset, batch_size=40, shuffle=False)
+    train_set, test_set = torch.utils.data.random_split(dataset, [0.8, 0.2], generator=torch.Generator().manual_seed(42))
 
-    evaluate(prop_module, dataloader)
-    _, losses = train(prop_module, dataloader, num_epochs=10)
-    evaluate(prop_module, dataloader)
+    train_dataloader = DataLoader(train_set, batch_size=batch_size, shuffle=False)
+    test_dataloader = DataLoader(test_set, batch_size=200, shuffle=False)
 
-    plt.plot(losses)
+    # evaluate(prop_module, test_dataloader)
+    _, losses = train(prop_module, train_dataloader, num_epochs=epochs)
+    accuracy = evaluate(prop_module, test_dataloader)
+
+    # plt.plot(losses)
+    # plt.plot(losses)
+    # plt.xlabel('Iteration')
+    # plt.ylabel('Loss')
+    # plt.title('Training Loss')
+    # plt.show()
+
+    if save:
+        torch.save(prop_module.state_dict(), 'propositions.torch')
+
+    return losses, accuracy
+
+
+def param_sweep():
+    hidden_dim_params = [2, 4, 8, 16, 32, 64, 128]
+    all_losses = []
+    accuracies = []
+
+    for hd in hidden_dim_params:
+        Semantics.HIDDEN_DIM = hd
+        losses, accuracy = learning_propositions(epochs=15)
+        all_losses.append(losses)
+        accuracies.append(accuracy)
+        plt.plot(losses, label=f"hd={hd} acc={torch.mean(accuracy)}")
+
     plt.xlabel('Iteration')
     plt.ylabel('Loss')
     plt.title('Training Loss')
+    plt.legend()
     plt.show()
-
-    torch.save(prop_module.state_dict(), 'propositions.torch')
 
 
 if __name__ == "__main__":
-    learning_propositions()
+    param_sweep()

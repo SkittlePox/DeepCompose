@@ -12,17 +12,17 @@ class LexiconParser:
         Parses a syntactic category like S/NP or (S/NP)/(S/NP)
         """
 
-        def findSlash(subcat):
-            bracketcount = 0
+        def find_slash(subcat):
+            bracket_count = 0
             for i in range(len(subcat)):
                 if subcat[i] == "(":
-                    bracketcount += 1
+                    bracket_count += 1
                 elif subcat[i] == ")":
-                    bracketcount -= 1
-                elif bracketcount == 0 and subcat[i] == "/":
+                    bracket_count -= 1
+                elif bracket_count == 0 and subcat[i] == "/":
                     return i
 
-        def stripFeature(subcat):
+        def strip_feature(subcat):
             features = []
             category = ""
             have_cat = False
@@ -41,49 +41,49 @@ class LexiconParser:
             if "[" not in cat:
                 return SyntacticCategory(lhs=SyntacticPrimitive(cat))
             else:
-                cat, features = stripFeature(cat)
+                cat, features = strip_feature(cat)
                 return SyntacticCategory(lhs=SyntacticPrimitive(cat), features=features)
         else:
-            centerSlash = findSlash(cat)
-            firstArg = cat[:centerSlash]
+            center_slash = find_slash(cat)
+            first_arg = cat[:center_slash]
             slash = None
 
-            if cat[centerSlash + 1] == "r":
-                secondArg = cat[centerSlash + 2:]
+            if cat[center_slash + 1] == "r":
+                second_arg = cat[center_slash + 2:]
                 slash = SyntacticSlash.R
-            elif cat[centerSlash + 1] == "l":
-                secondArg = cat[centerSlash + 2:]
+            elif cat[center_slash + 1] == "l":
+                second_arg = cat[center_slash + 2:]
                 slash = SyntacticSlash.L
             else:
-                secondArg = cat[centerSlash + 1:]
+                second_arg = cat[center_slash + 1:]
 
-            if firstArg[0] == "(":
-                firstArg = firstArg[1:-1]
-            if secondArg[0] == "(":
-                secondArg = secondArg[1:-1]
-            return SyntacticCategory(lhs=self.parse_syntactic_category(firstArg),
-                                     rhs=self.parse_syntactic_category(secondArg), slash=slash)
+            if first_arg[0] == "(":
+                first_arg = first_arg[1:-1]
+            if second_arg[0] == "(":
+                second_arg = second_arg[1:-1]
+            return SyntacticCategory(lhs=self.parse_syntactic_category(first_arg),
+                                     rhs=self.parse_syntactic_category(second_arg), slash=slash)
 
-    def parse_semantic_type(self, type):
+    def parse_semantic_type(self, semantic_type):
         """
         Parses a semantic type like <e,t> or <e,<e,t>>
         """
 
-        def findBreak(subtype):
-            bracketcount = 0
-            for i in range(len(subtype)):
-                if subtype[i] == "<":
-                    bracketcount += 1
-                elif subtype[i] == ">":
-                    bracketcount -= 1
-                elif bracketcount == 0 and subtype[i] == ",":
+        def find_break(s_type):
+            bracket_count = 0
+            for i in range(len(s_type)):
+                if s_type[i] == "<":
+                    bracket_count += 1
+                elif s_type[i] == ">":
+                    bracket_count -= 1
+                elif bracket_count == 0 and s_type[i] == ",":
                     return i
 
-        if type[0] != "<":
-            return SemanticType(rhs=SemanticTypePrimitive(type))
+        if semantic_type[0] != "<":
+            return SemanticType(rhs=SemanticTypePrimitive(semantic_type))
         else:
-            subtype = type[1:-1]
-            centerline = findBreak(subtype)
+            subtype = semantic_type[1:-1]
+            centerline = find_break(subtype)
             return SemanticType(lhs=self.parse_semantic_type(subtype[:centerline]),
                                 rhs=self.parse_semantic_type(subtype[centerline + 1:]))
 
@@ -93,19 +93,19 @@ class LexiconParser:
         m=(m=1 p=1) p=(m=0 p=1) z=(m=0 p=0) -> {m: {m: 1, p: 1}, p: {m: 0, p: 1}, z: {m: 0, p: 0}}
         """
 
-        def tokenize(subfunc):  # This tokenizes a function: m=1 p=0 -> ["m=1", "p=0"]
-            subfunc += " "
-            bracketcount = 0
+        def tokenize(s_func):  # This tokenizes a function: m=1 p=0 -> ["m=1", "p=0"]
+            s_func += " "
+            bracket_count = 0
             start = 0
             lst = []
             i = 0
-            while i < len(subfunc):
-                if subfunc[i] == "(":
-                    bracketcount += 1
-                elif subfunc[i] == ")":
-                    bracketcount -= 1
-                elif bracketcount == 0 and subfunc[i] == " " or i == len(subfunc) - 1:
-                    lst.append(subfunc[start:i])
+            while i < len(s_func):
+                if s_func[i] == "(":
+                    bracket_count += 1
+                elif s_func[i] == ")":
+                    bracket_count -= 1
+                elif bracket_count == 0 and s_func[i] == " " or i == len(s_func) - 1:
+                    lst.append(s_func[start:i])
                     start = i + 1
                     i += 1
                 i += 1

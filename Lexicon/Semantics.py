@@ -172,8 +172,11 @@ class PropositionSetModule(nn.Module):
         return torch.cat(outputs, dim=1)
 
 
+HIDDEN_DIM = 2
+
+
 # TODO: Turn this into a generative function
-def get_semantic_type_dims(semantic_type, hidden_dim=64):
+def get_semantic_type_dims(semantic_type, hidden_dim=HIDDEN_DIM):
     semantic_type_str = str(semantic_type)
     semantic_type_dims_dict = {"e": (-1, hidden_dim, 1), "t": (-1, 1), "<e,t>": (-1, 1, hidden_dim),
                                "<e,<e,t>>": (-1, hidden_dim, hidden_dim)}
