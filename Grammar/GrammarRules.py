@@ -1,9 +1,9 @@
-from LexicalStructures import *
-
-parser = LexiconParser()
+from Lexicon import *
 
 
 ### R-1a
+from Lexicon import LexicalEntry
+
 
 def R1a_test(a, b):
     return a.syntax.slash == SyntacticSlash.R and a.syntax.rhs == b.syntax

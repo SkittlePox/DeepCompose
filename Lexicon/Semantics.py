@@ -61,9 +61,9 @@ class UnFlatten(nn.Module):
 
     def forward(self, x):
         # print(x.size())
-        print(self.dims)
+        # print(self.dims)
         out = x.view(*self.dims)
-        print(out.size())
+        # print(out.size())
         return out
 
 
@@ -86,15 +86,19 @@ class ExtensionModule(nn.Module):
 
         self.intension = nn.Sequential(
             nn.Conv2d(image_channels, image_dim, kernel_size=4, stride=2),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.Conv2d(32, 64, kernel_size=4, stride=2),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.Conv2d(64, 128, kernel_size=4, stride=2),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.Conv2d(128, 256, kernel_size=4, stride=2),
-            nn.ReLU(),
+            nn.Tanh(),
             Flatten(),
-            nn.Linear(1024, abs(reduce(lambda x, y: x * y, output_dims))),
+            nn.Linear(1024, 256),
+            nn.Tanh(),
+            nn.Linear(256, 256),
+            nn.Tanh(),
+            nn.Linear(256, abs(reduce(lambda x, y: x * y, output_dims))),
             UnFlatten(dims=output_dims)
         )
 
@@ -125,6 +129,7 @@ class SemanticIntensionPrimitive(SemanticEntry):
     def __init__(self, name, module, semantic_type):
         super().__init__(name=name, semantic_type=semantic_type)
         self.module = module
+        self.add_module(name, module)
 
     def forward(self, state):
         return self.module.forward(state)
@@ -140,13 +145,27 @@ class SemanticIntensionApplication(SemanticEntry):
                          semantic_type=function_module.semantic_type(argument_module.semantic_type))
         self.function_module = function_module
         self.argument_module = argument_module
+        self.add_module(function_module.name, function_module)
+        self.add_module(argument_module.name, argument_module)
+        self.unflatten_output = UnFlatten(dims=get_semantic_type_dims(self.function_module.semantic_type.rhs))
 
     def forward(self, state):
         function = self.function_module.forward(state)
         argument = self.argument_module.forward(state)
-        print(function.size())
-        print(argument.size())
-        comp = torch.matmul(function, argument)
+        # print(argument.size())
+        # print(function.size())
+        # print(self.function_module.semantic_type)
+        # print(get_semantic_type_dims(self.function_module.semantic_type))
+        # print(get_semantic_type_dims(self.argument_module.semantic_type))
+
+        if str(self.function_module.semantic_type.lhs) == "<e,t>":  # This is not pretty
+            argument = argument.view(get_semantic_type_dims(SemanticTypePrimitive.e))
+
+        # print(argument.size())
+
+        comp = torch.matmul(argument, function)
+        comp = self.unflatten_output(comp)
+        # print(f"Output: {comp.size()}")
         return torch.sigmoid(comp)
 
 
@@ -158,58 +177,110 @@ class PropositionSetModule(nn.Module):
 
     def forward(self, state):
         outputs = [prop.forward(state) for prop in self.semantic_intensions]
-        return torch.cat(outputs)
+        return torch.cat(outputs, dim=1)
 
 
-# TODO: Turn this into a generative function
-def spawn_extension_module(semantic_type):
+HIDDEN_DIM = 256
+
+
+# TODO: Turn this into a generative function and put into SemanticType
+def get_semantic_type_dims(semantic_type):
     semantic_type_str = str(semantic_type)
-    semantic_type_dims_dict = {"e": (32,), "<e,t>": (-1, 32), "<e,<e,t>>": (-1, 32, 32)}
-    return ExtensionModule(output_dims=semantic_type_dims_dict[semantic_type_str])
+    semantic_type_dims_dict = {"e": (-1, 1, HIDDEN_DIM), "t": (-1, 1), "<e,t>": (-1, HIDDEN_DIM, 1),
+                               "<e,<e,t>>": (-1, HIDDEN_DIM, HIDDEN_DIM), "<<e,t>,<e,t>>": (-1, HIDDEN_DIM, HIDDEN_DIM)}
+    return semantic_type_dims_dict[semantic_type_str]
 
 
 def main():
-    np = ExtensionModule(output_dims=(32,))
-    snp = ExtensionModule(output_dims=(1, 32))
-    snpnp = ExtensionModule(output_dims=(1, 32, 32))
+    np = ExtensionModule(output_dims=(-1, 1, 32))
+    snp = ExtensionModule(output_dims=(-1, 32, 1))
+    snpnp = ExtensionModule(output_dims=(-1, 32, 32))
+    npnp = ExtensionModule(output_dims=(-1, 32, 32))
+    snpsnp = ExtensionModule(output_dims=(-1, 1, 1))
+
     resize = transforms.Resize(64)
     image = read_image(f"taxi.png", torchvision.io.ImageReadMode.RGB)
     # print(image.size())
     image = resize(image).type(torch.float)
-    image = image.repeat((1, 1, 1, 1))
+    image = image.repeat((10, 1, 1, 1))
     # print(image.size())
     npe = np.forward(image)
     snpe = snp.forward(image)
-    print(f"snpe size: {snpe.size()}")
-    print(f"npe size: {npe.size()}")
-
-    print(torch.matmul(snpe, npe))
     snpnpe = snpnp.forward(image)
+    adje = npnp.forward(image)
+    adve = snpsnp.forward(image)
+
+    print(f"npe size: {npe.size()}")
+    print(f"snpe size: {snpe.size()}")
     print(f"snpnpe size: {snpnpe.size()}")
-    print(npe.size())
-    new_snpe = torch.matmul(snpnpe, npe)
-    print(f"new_snpe size: {new_snpe.size()}")
-    torch.matmul(new_snpe, npe)
-    print(torch.matmul(torch.matmul(snpnpe, npe), npe))
+    print(f"adje size: {adje.size()}")
+    print(f"adve size: {adve.size()}")
+
+    s = torch.matmul(npe, snpe)
+    print(f"snpe(npe) = s size: {s.size()}")
+    unflatten = UnFlatten(dims=(-1, 1, 1))
+    s = unflatten.forward(s)
+    print(f"snpe(npe) = s size: {s.size()} (unflattened)")
+
+    new_snp = torch.matmul(npe, snpnpe)
+    print(f"snpnpe(npe) = snp size: {new_snp.size()}")
+    unflatten = UnFlatten(dims=(-1, 32, 1))
+    new_snp = unflatten.forward(new_snp)
+    print(f"snpnpe(npe) = snp size: {new_snp.size()} (unflattened)")
+
+    new_s = torch.matmul(npe, new_snp)
+    unflatten = UnFlatten(dims=(-1, 1, 1))
+    new_s = unflatten.forward(new_s)
+    print(f"snpnpe(npe)(npe) = s size: {new_s.size()}")
+
+    new_np = torch.matmul(npe, adje)
+    unflatten = UnFlatten(dims=(-1, 1, 32))
+    new_np = unflatten.forward(new_np)
+    print(f"adje(npe) = npe size: {new_np.size()}")
+
+    new_new_snp = torch.matmul(snpe, adve)
+    unflatten = UnFlatten(dims=(-1, 32, 1))
+    new_new_snp = unflatten.forward(new_new_snp)
+    print(f"adv(snpe) = snp size: {new_new_snp.size()}")
+
+    # print(torch.matmul(snpe, npe))
+    # snpnpe = snpnp.forward(image)
+    # print(f"snpnpe size: {snpnpe.size()}")
+    # print(npe.size())
+
+    # torch.matmul(new_snpe, npe)
+    # print(torch.matmul(torch.matmul(snpnpe, npe), npe))
 
 
 def test():
     type_e = SemanticTypePrimitive.e
     type_et = SemanticType(lhs=type_e, rhs=SemanticTypePrimitive.t)
-    taxi = SemanticIntensionPrimitive(name="taxi", module=ExtensionModule(output_dims=(-1, 32, 1)), semantic_type=type_e)
-    touch_n = SemanticIntensionPrimitive(name="touching_north", module=ExtensionModule(output_dims=(-1, 1, 32)), semantic_type=type_et)
+    type_ett = SemanticType(lhs=type_et, rhs=SemanticTypePrimitive.t)
+    type_etet = SemanticType(lhs=type_et, rhs=type_et)
+    taxi = SemanticIntensionPrimitive(name="taxi", module=ExtensionModule(output_dims=(-1, 1, 32)),
+                                      semantic_type=type_e)
+    touch_n = SemanticIntensionPrimitive(name="touching_north", module=ExtensionModule(output_dims=(-1, 32, 1)),
+                                         semantic_type=type_et)
     taxi_touching_n = SemanticIntensionApplication(function_module=touch_n, argument_module=taxi)
+
+    slightly = SemanticIntensionPrimitive(name="slightly", module=ExtensionModule(output_dims=(-1, 32, 32)),
+                                          semantic_type=type_etet)
+
+    slightly_touching_n = SemanticIntensionApplication(function_module=slightly, argument_module=touch_n)
+    # print(slightly_touching_n.semantic_type)
+    taxi_slightly_touching_n = SemanticIntensionApplication(function_module=slightly_touching_n, argument_module=taxi)
 
     resize = transforms.Resize(64)
     image = read_image(f"taxi.png", torchvision.io.ImageReadMode.RGB)
     image = resize(image).type(torch.float)
-    image = image.repeat((2, 1, 1, 1))
+    image = image.repeat((3, 1, 1, 1))
     print(image.size())
 
     print(taxi_touching_n.forward(image))
     print(taxi_touching_n)
+    print(taxi_slightly_touching_n.forward(image))
 
 
 if __name__ == "__main__":
-    main()
-    # test()
+    # main()
+    test()

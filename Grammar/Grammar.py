@@ -31,7 +31,7 @@ class UnaryRule(Rule):
         return self.operate(a)
 
 
-class Grammar():
+class Grammar:
     def __init__(self):
         rules = {}
         rules['R-1a'] = (

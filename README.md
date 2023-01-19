@@ -1,4 +1,6 @@
-# Direct-Compositional-Parser
+# DeepCompose
+
+DeepCompose is a framework for intensional semantics.
 
 This is an implementation of the Direct Compositional semantic framework as given in CLPS 1342: Compositional Semantics
 
