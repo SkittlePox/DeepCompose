@@ -118,7 +118,8 @@ def taxi_example():
     print(lexicon.get_entry("inside").semantics.forward(image))
 
 
-def learning_propositions(epochs=20, batch_size=40, save=False):
+def learning_propositions(epochs=20, batch_size=30, save=True):
+    # Semantics.HIDDEN_DIM = 32
     lex_parser = LexiconParser()
     entries = lex_parser.parse_file("taxi_lexicon.txt")
     lexicon = Lexicon(list(set(entries)))
@@ -149,39 +150,32 @@ def learning_propositions(epochs=20, batch_size=40, save=False):
 
     file = open('./images/random_states.pkl', 'rb')
     dataset = PropositionDataset(root_dir="./images/random_states/", label_dict=pickle.load(file))
-    train_set, test_set = torch.utils.data.random_split(dataset, [0.8, 0.2], generator=torch.Generator().manual_seed(42))
+    train_set, test_set = torch.utils.data.random_split(dataset, [0.8, 0.2])
 
+    # train_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     train_dataloader = DataLoader(train_set, batch_size=batch_size, shuffle=False)
-    test_dataloader = DataLoader(test_set, batch_size=200, shuffle=False)
+    test_dataloader = DataLoader(test_set, batch_size=40, shuffle=False)
 
     # evaluate(prop_module, test_dataloader)
     _, losses = train(prop_module, train_dataloader, num_epochs=epochs)
-    accuracy = evaluate(prop_module, test_dataloader)
-
-    # plt.plot(losses)
-    # plt.plot(losses)
-    # plt.xlabel('Iteration')
-    # plt.ylabel('Loss')
-    # plt.title('Training Loss')
-    # plt.show()
+    train_accuracy = evaluate(prop_module, train_dataloader)
+    test_accuracy = evaluate(prop_module, test_dataloader)
 
     if save:
-        torch.save(prop_module.state_dict(), 'propositions.torch')
+        torch.save(prop_module, 'propositions.pt')
+        pickle.dump(lexicon, open('lexicon.pkl', 'wb'))
 
-    return losses, accuracy
+    return losses, test_accuracy, train_accuracy
 
 
 def param_sweep():
-    hidden_dim_params = [2, 4, 8, 16, 32, 64, 128]
-    all_losses = []
-    accuracies = []
+    hidden_dim_params = [2, 4, 8, 16, 32, 64, 128, 256][4:]
 
     for hd in hidden_dim_params:
         Semantics.HIDDEN_DIM = hd
-        losses, accuracy = learning_propositions(epochs=15)
-        all_losses.append(losses)
-        accuracies.append(accuracy)
-        plt.plot(losses, label=f"hd={hd} acc={torch.mean(accuracy)}")
+        losses, test_accuracy, train_accuracy = learning_propositions(epochs=30, save=False)
+        plt.plot(losses, label=f"hd={hd} test_acc={str(torch.mean(test_accuracy).tolist())[:5]}"
+                               f" train_acc={str(torch.mean(train_accuracy).tolist())[:5]}")
 
     plt.xlabel('Iteration')
     plt.ylabel('Loss')
@@ -190,5 +184,33 @@ def param_sweep():
     plt.show()
 
 
+def probe():
+    # model = torch.load("propositions.pt")
+    # print(type(model))
+    # print(model.semantic_intensions)
+
+    lexicon = pickle.load(open("lexicon.pkl", 'rb'))
+
+    file = open('./images/random_states.pkl', 'rb')
+    dataset = PropositionDataset(root_dir="./images/random_states/", label_dict=pickle.load(file))
+    dataloader = DataLoader(dataset, batch_size=200, shuffle=False)
+
+    taxi = lexicon.get_entry("taxi")
+    taxi_model = taxi.semantics
+    taxi_model.eval()
+
+    pred = None
+
+    for i, batch in enumerate(dataloader):
+        X, y = batch[0], batch[1]
+        with torch.no_grad():
+            pred = taxi_model(X)
+
+    print(pred.size())
+    plt.scatter(pred)
+
+
 if __name__ == "__main__":
-    param_sweep()
+    # param_sweep()
+    learning_propositions(save=False)
+    # probe()
