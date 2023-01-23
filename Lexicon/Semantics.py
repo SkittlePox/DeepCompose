@@ -49,19 +49,14 @@ class SemanticType:
                and self.lhs == other.lhs and self.rhs == other.rhs
 
 
-class Flatten(nn.Module):
-    def forward(self, x):
-        return x.view(x.size(0), -1)
-
-
 class UnFlatten(nn.Module):
     def __init__(self, dims):
         super().__init__()
         self.dims = dims
 
     def forward(self, x):
-        # print(x.size())
-        # print(self.dims)
+        print(x.size())
+        print(self.dims)
         out = x.view(*self.dims)
         # print(out.size())
         return out
@@ -93,17 +88,19 @@ class ExtensionModule(nn.Module):
             nn.Tanh(),
             nn.Conv2d(128, 256, kernel_size=4, stride=2),
             nn.Tanh(),
-            Flatten(),
+            nn.Flatten(),
             nn.Linear(1024, 256),
             nn.Tanh(),
             nn.Linear(256, 256),
             nn.Tanh(),
             nn.Linear(256, abs(reduce(lambda x, y: x * y, output_dims))),
-            UnFlatten(dims=output_dims)
+            # UnFlatten(dims=output_dims)
+            nn.Unflatten(1, (output_dims[1], output_dims[2]))
         )
 
     def forward(self, state):
-        return self.intension(state)
+        extension = self.intension(state)
+        return extension
 
 
 class SemanticEntry(nn.Module):
@@ -147,13 +144,17 @@ class SemanticIntensionApplication(SemanticEntry):
         self.argument_module = argument_module
         self.add_module(function_module.name, function_module)
         self.add_module(argument_module.name, argument_module)
-        self.unflatten_output = UnFlatten(dims=get_semantic_type_dims(self.function_module.semantic_type.rhs))
+        # self.unflatten_argument = nn.Unflatten(1, )
+
+        # self.unflatten_output = UnFlatten(dims=get_semantic_type_dims(self.function_module.semantic_type.rhs))
+        # output_dims = get_semantic_type_dims(self.function_module.semantic_type.rhs)
+        # self.unflatten_output = nn.Unflatten(1, )
 
     def forward(self, state):
         function = self.function_module.forward(state)
         argument = self.argument_module.forward(state)
-        # print(argument.size())
-        # print(function.size())
+        print(argument.size())
+        print(function.size())
         # print(self.function_module.semantic_type)
         # print(get_semantic_type_dims(self.function_module.semantic_type))
         # print(get_semantic_type_dims(self.argument_module.semantic_type))
@@ -163,10 +164,11 @@ class SemanticIntensionApplication(SemanticEntry):
 
         # print(argument.size())
 
-        comp = torch.matmul(argument, function)
-        comp = self.unflatten_output(comp)
+        extension = torch.matmul(argument, function)
+        extension = extension.view(get_semantic_type_dims(self.function_module.semantic_type.rhs))
+        # comp = self.unflatten_output(comp)
         # print(f"Output: {comp.size()}")
-        return torch.sigmoid(comp)
+        return torch.sigmoid(extension)
 
 
 class PropositionSetModule(nn.Module):

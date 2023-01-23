@@ -245,5 +245,5 @@ def probe():
 
 if __name__ == "__main__":
     # param_sweep()
-    # learning_propositions(save=True)
-    probe()
+    learning_propositions(save=False)
+    # probe()
