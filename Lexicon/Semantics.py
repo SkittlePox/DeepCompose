@@ -6,6 +6,15 @@ from torchvision.io import read_image
 from torchvision import transforms
 from functools import reduce
 
+HIDDEN_DIM = 256
+
+
+def get_semantic_type_dims(semantic_type):
+    semantic_type_str = str(semantic_type)
+    semantic_type_dims_dict = {"e": (-1, 1, HIDDEN_DIM), "t": (-1, 1), "<e,t>": (-1, HIDDEN_DIM, 1),
+                               "<e,<e,t>>": (-1, HIDDEN_DIM, HIDDEN_DIM), "<<e,t>,<e,t>>": (-1, HIDDEN_DIM, HIDDEN_DIM)}
+    return semantic_type_dims_dict[semantic_type_str]
+
 
 class SemanticTypePrimitive(enum.Enum):
     def __str__(self):
@@ -76,8 +85,13 @@ class ExtensionModule(nn.Module):
     hidden_dim is M here.
     """
 
-    def __init__(self, output_dims, image_channels=3, image_dim=32):
+    def __init__(self, output_dims, semantic_type=None, image_channels=3, image_dim=32):
         super().__init__()
+
+        self.semantic_type = semantic_type
+
+        if semantic_type is not None:
+            output_dims = get_semantic_type_dims(semantic_type)
 
         self.intension = nn.Sequential(
             nn.Conv2d(image_channels, image_dim, kernel_size=4, stride=2),
@@ -182,17 +196,6 @@ class PropositionSetModule(nn.Module):
         return torch.cat(outputs, dim=1)
 
 
-HIDDEN_DIM = 256
-
-
-# TODO: Turn this into a generative function and put into SemanticType
-def get_semantic_type_dims(semantic_type):
-    semantic_type_str = str(semantic_type)
-    semantic_type_dims_dict = {"e": (-1, 1, HIDDEN_DIM), "t": (-1, 1), "<e,t>": (-1, HIDDEN_DIM, 1),
-                               "<e,<e,t>>": (-1, HIDDEN_DIM, HIDDEN_DIM), "<<e,t>,<e,t>>": (-1, HIDDEN_DIM, HIDDEN_DIM)}
-    return semantic_type_dims_dict[semantic_type_str]
-
-
 def main():
     np = ExtensionModule(output_dims=(-1, 1, 32))
     snp = ExtensionModule(output_dims=(-1, 32, 1))
@@ -284,5 +287,5 @@ def test():
 
 
 if __name__ == "__main__":
-    # main()
-    test()
+    main()
+    # test()
