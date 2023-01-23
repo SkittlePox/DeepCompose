@@ -138,8 +138,7 @@ class LexiconParser:
         english = entry_array[0]
         category = self.parse_syntactic_category(entry_array[1])
         semantic_type = self.parse_semantic_type(entry_array[2])
-        semantics = SemanticIntensionPrimitive(name=entry_array[3], module=ExtensionModule(
-            output_dims=get_semantic_type_dims(semantic_type)),
+        semantics = SemanticIntensionPrimitive(name=entry_array[3], module=ExtensionModule(semantic_type=semantic_type),
                                                semantic_type=semantic_type)
         return LexicalEntry(english, category, semantics)
 

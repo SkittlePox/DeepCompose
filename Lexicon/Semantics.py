@@ -85,7 +85,7 @@ class ExtensionModule(nn.Module):
     hidden_dim is M here.
     """
 
-    def __init__(self, output_dims, semantic_type=None, image_channels=3, image_dim=32):
+    def __init__(self, output_dims=None, semantic_type=None, image_channels=3, image_dim=32):
         super().__init__()
 
         self.semantic_type = semantic_type
@@ -156,8 +156,11 @@ class SemanticIntensionApplication(SemanticEntry):
                          semantic_type=function_module.semantic_type(argument_module.semantic_type))
         self.function_module = function_module
         self.argument_module = argument_module
+        self.semantic_type = self.function_module.semantic_type(self.argument_module.semantic_type)
+
         self.add_module(function_module.name, function_module)
         self.add_module(argument_module.name, argument_module)
+
         # self.unflatten_argument = nn.Unflatten(1, )
 
         # self.unflatten_output = UnFlatten(dims=get_semantic_type_dims(self.function_module.semantic_type.rhs))
