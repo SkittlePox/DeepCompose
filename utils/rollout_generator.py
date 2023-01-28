@@ -7,14 +7,20 @@ from visgrid.envs import GridworldEnv, TaxiEnv
 from visgrid.agents.expert import TaxiExpert
 
 
-def save_rollouts(images, marker, oo_states=None, states=None):
-    os.mkdir(f"../images/rollouts/agent-{marker}")
+def save_rollouts(marker, images, oo_states, states, rewards, expert=False):
+    if not expert:
+        directory = "../images/random_rollouts"
+    else:
+        directory = "../images/expert_rollouts"
+
+    os.mkdir(f"{directory}/agent-{marker}")
     for i in range(len(images)):
-        plt.imsave(f"../images/rollouts/agent-{marker}/{i}.png", images[i])
-    file = open(f'../images/rollouts/agent-{marker}-propositions.pkl', 'wb')
-    pickle.dump(oo_states, file)
-    file2 = open(f'../images/rollouts/agent-{marker}-states.pkl', 'wb')
-    pickle.dump(states, file2)
+        plt.imsave(f"{directory}/agent-{marker}/{i}.png", images[i])
+
+    info_dict = {"oo_states": oo_states, "states": states, "rewards": rewards}
+
+    file = open(f'{directory}/agent-{marker}-info.pkl', 'wb')
+    pickle.dump(info_dict, file)
 
 
 def generate_random_states(env, num_states, save=True):
@@ -35,11 +41,12 @@ def generate_random_states(env, num_states, save=True):
         pickle.dump(all_oo_states, file)
 
 
-def generate_rollouts(env, agent=None, max_steps=100, min_rollouts=100, save=True):
+def generate_rollouts(env, agent=None, max_steps=1000, min_rollouts=100, save=True):
     imsum = 0
     all_images = []
     all_states = []
     all_oo_states = []
+    all_rewards = []
 
     def rollout():
         ob, info = env.reset()
@@ -47,6 +54,7 @@ def generate_rollouts(env, agent=None, max_steps=100, min_rollouts=100, save=Tru
         images = [ob]
         oo_states = [oo_state]
         states = [info['state']]
+        rewards = [-1]
 
         n_steps = 0
         while n_steps < max_steps:
@@ -58,22 +66,24 @@ def generate_rollouts(env, agent=None, max_steps=100, min_rollouts=100, save=Tru
             images.append(ob)
             oo_states.append(env.get_oo_state())
             states.append(info['state'])
+            rewards.append(reward)
             n_steps += 1
             if terminal:
                 break
 
-        return images, oo_states, states
+        return images, oo_states, states, rewards
 
     rollout_num = 0
 
     while imsum < min_rollouts:
-        images, oo_states, states = rollout()
+        images, oo_states, states, rewards = rollout()
         imsum += len(images)
         all_images.append(images)
         all_oo_states.append(oo_states)
         all_states.append(states)
+        all_rewards.append(rewards)
         if save:
-            save_rollouts(images, rollout_num, oo_states, states)
+            save_rollouts(rollout_num, images, oo_states, states, rewards, expert=agent is not None)
             rollout_num += 1
 
     return all_images, all_oo_states, all_states
@@ -85,7 +95,7 @@ env = TaxiEnv(exploring_starts=True,
               should_render=True,
               dimensions=TaxiEnv.dimensions_5x5_to_64x64)
 
-# expert = TaxiExpert(env)
+expert = TaxiExpert(env)
 
-generate_rollouts(env, min_rollouts=1000, save=True)
+generate_rollouts(env, agent=expert, min_rollouts=5000, save=True)
 # generate_random_states(env, num_states=200)
