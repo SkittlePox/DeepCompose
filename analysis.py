@@ -81,7 +81,50 @@ def proposition_cooccurence():
     plt.show()
 
 
+def rollout_proposition_changes(dir_name, num_agents=5):
+    all_oo_states = []
+    for a in range(num_agents):
+        file = open(f'./images/{dir_name}/agent-{a}-info.pkl', 'rb')
+        info = pickle.load(file)
+        all_oo_states.append(info['oo_states'])
+
+    def calc_prop_changes_aggregate(oo_states):
+        prop_changes = []
+        for i in range(len(oo_states)-1):
+            prop_changes.append(np.sum(np.bitwise_xor(oo_states[i], oo_states[i+1])))
+        return prop_changes
+
+    def calc_prop_changes_piecemeal(oo_states):
+        prop_changes = []
+        for i in range(len(oo_states)-1):
+            prop_changes.append(np.bitwise_xor(oo_states[i], oo_states[i+1]))
+        return prop_changes
+
+    all_prop_changes = [calc_prop_changes_aggregate(o_s) for o_s in all_oo_states]
+    mean_prop_changes = [np.mean(p_c) for p_c in all_prop_changes]
+    print(f"Mean Prop changes per step for {dir_name}: {np.mean(mean_prop_changes)}")
+
+    piece_prop_changes = [np.stack(calc_prop_changes_piecemeal(o_s)) for o_s in all_oo_states]
+    mean_piece_prop_changes = [np.mean(p_c, axis=0) for p_c in piece_prop_changes]
+    # print(np.mean(piece_prop_changes[0], axis=0))
+    # print(piece_prop_changes[1].shape)
+    mean_mean_piece_prop_changes = np.mean(np.stack(mean_piece_prop_changes), axis=0)
+    print(f"Mean Prop changes per step (piecemeal) for {dir_name}: {mean_mean_piece_prop_changes}")
+
+    fig, ax = plt.subplots()
+    ax.bar(TERMS, mean_mean_piece_prop_changes)
+    ax.tick_params(axis='x', labelrotation=45)
+    ax.axhline(y=0.5, color='r', linestyle='-')
+
+    ax.set_ylabel('Chance of flipping value per step')
+    ax.set_title(f'Average Change of Proposition Value per step ({dir_name})')
+
+    plt.show()
+
+
 if __name__ == "__main__":
     # proposition_distribution()
-    proposition_cooccurence()
+    # proposition_cooccurence()
     # state_distribution()
+    rollout_proposition_changes(dir_name="expert_rollouts", num_agents=542)
+    rollout_proposition_changes(dir_name="random_rollouts")
