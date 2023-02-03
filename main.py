@@ -171,7 +171,7 @@ def learning_propositions(epochs=20, batch_size=30, save=True, fixed_primitives=
 
 
 def param_sweep(fixed_primitives=False, epochs=30):
-    hidden_dim_params = [2, 4, 8, 16, 32, 64, 128, 256][4:]
+    hidden_dim_params = [2, 4, 8, 16, 32, 64, 128, 256][:]
 
     for hd in hidden_dim_params:
         Semantics.HIDDEN_DIM = hd
@@ -179,12 +179,12 @@ def param_sweep(fixed_primitives=False, epochs=30):
         plt.plot(losses, label=f"hd={hd} test_acc={str(torch.mean(test_accuracy).tolist())[:5]}"
                                f" train_acc={str(torch.mean(train_accuracy).tolist())[:5]}")
 
-    if fixed_primitives:
-        Semantics.HIDDEN_DIM = 256
-        losses, test_accuracy, train_accuracy = learning_propositions(epochs=epochs, save=False,
-                                                                      fixed_primitives=False)
-        plt.plot(losses, label=f"unfixed hd={256} test_acc={str(torch.mean(test_accuracy).tolist())[:5]}"
-                               f" train_acc={str(torch.mean(train_accuracy).tolist())[:5]}")
+    # if fixed_primitives:
+    #     Semantics.HIDDEN_DIM = 256
+    #     losses, test_accuracy, train_accuracy = learning_propositions(epochs=epochs, save=False,
+    #                                                                   fixed_primitives=False)
+    #     plt.plot(losses, label=f"unfixed hd={256} test_acc={str(torch.mean(test_accuracy).tolist())[:5]}"
+    #                            f" train_acc={str(torch.mean(train_accuracy).tolist())[:5]}")
 
     plt.xlabel('Iteration')
     plt.ylabel('Loss')
@@ -252,6 +252,6 @@ def probe():
 
 
 if __name__ == "__main__":
-    # param_sweep(fixed_primitives=True, epochs=20)
+    param_sweep(fixed_primitives=True, epochs=20)
     # learning_propositions(epochs=20, save=False)
-    probe()
+    # probe()

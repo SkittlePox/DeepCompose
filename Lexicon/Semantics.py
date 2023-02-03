@@ -6,7 +6,7 @@ from torchvision.io import read_image
 from torchvision import transforms
 from functools import reduce
 
-HIDDEN_DIM = 128
+HIDDEN_DIM = 8
 
 
 def get_semantic_type_dims(semantic_type):
@@ -129,7 +129,8 @@ class FixedExtensionModule(nn.Module):
         self.output_dims = output_dims
 
         # self.extension = torch.rand(tuple(abs(x) for x in output_dims))
-        self.extension = torch.normal(mean=0.0, std=0.33, size=tuple(abs(x) for x in output_dims))
+        # self.extension = torch.normal(mean=0.0, std=0.5, size=tuple(abs(x) for x in output_dims))
+        self.extension = torch.distributions.uniform.Uniform(-1.0, 1.0).sample(tuple(abs(x) for x in output_dims))
 
     def forward(self, state):
         return self.extension.expand(state.size()[0], -1, -1)   # For batching properly
@@ -203,7 +204,7 @@ class SemanticIntensionApplication(SemanticEntry):
         extension = extension.view(get_semantic_type_dims(self.function_module.semantic_type.rhs))
         # comp = self.unflatten_output(comp)
         # print(f"Output: {comp.size()}")
-        return torch.sigmoid(extension)
+        return torch.tanh(extension)
 
 
 class PropositionSetModule(nn.Module):
