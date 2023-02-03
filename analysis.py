@@ -106,8 +106,6 @@ def rollout_proposition_changes(dir_name, num_agents=5):
 
     piece_prop_changes = [np.stack(calc_prop_changes_piecemeal(o_s)) for o_s in all_oo_states]
     mean_piece_prop_changes = [np.mean(p_c, axis=0) for p_c in piece_prop_changes]
-    # print(np.mean(piece_prop_changes[0], axis=0))
-    # print(piece_prop_changes[1].shape)
     mean_mean_piece_prop_changes = np.mean(np.stack(mean_piece_prop_changes), axis=0)
     print(f"Mean Prop changes per step (piecemeal) for {dir_name}: {mean_mean_piece_prop_changes}")
 
@@ -122,9 +120,23 @@ def rollout_proposition_changes(dir_name, num_agents=5):
     plt.show()
 
 
+def rollout_proposition_and_reward(dir_name, num_agents=5):
+    all_oo_states = []
+    all_rewards = []
+    for a in range(num_agents):
+        file = open(f'./images/{dir_name}/agent-{a}-info.pkl', 'rb')
+        info = pickle.load(file)
+        all_oo_states.append(info['oo_states'])
+        all_rewards.append(info['rewards'])
+
+    print(all_rewards)
+
+
 if __name__ == "__main__":
     # proposition_distribution()
     # proposition_cooccurence()
     # state_distribution()
-    rollout_proposition_changes(dir_name="expert_rollouts", num_agents=542)
-    rollout_proposition_changes(dir_name="random_rollouts")
+    # rollout_proposition_changes(dir_name="expert_rollouts", num_agents=534)
+    # rollout_proposition_changes(dir_name="random_rollouts")
+    rollout_proposition_and_reward(dir_name="expert_rollouts", num_agents=534)
+    # rollout_proposition_and_reward(dir_name="random_rollouts")

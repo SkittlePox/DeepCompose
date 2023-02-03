@@ -54,7 +54,7 @@ def generate_rollouts(env, agent=None, max_steps=1000, min_rollouts=100, save=Tr
         images = [ob]
         oo_states = [oo_state]
         states = [info['state']]
-        rewards = [-1]
+        rewards = [0]
 
         n_steps = 0
         while n_steps < max_steps:
@@ -97,5 +97,5 @@ env = TaxiEnv(exploring_starts=True,
 
 expert = TaxiExpert(env)
 
-generate_rollouts(env, agent=expert, min_rollouts=5000, save=True)
+generate_rollouts(env, agent=None, min_rollouts=5000, save=True)
 # generate_random_states(env, num_states=200)
