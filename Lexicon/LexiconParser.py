@@ -4,8 +4,8 @@ from .LexicalStructures import *
 
 
 class LexiconParser:
-    def __init__(self):
-        pass
+    def __init__(self, fixed_primitives=True):
+        self.fixed_primitives = fixed_primitives
 
     def parse_syntactic_category(self, cat):
         """
@@ -138,8 +138,11 @@ class LexiconParser:
         english = entry_array[0]
         category = self.parse_syntactic_category(entry_array[1])
         semantic_type = self.parse_semantic_type(entry_array[2])
-        semantics = SemanticIntensionPrimitive(name=entry_array[3], module=ExtensionModule(semantic_type=semantic_type),
-                                               semantic_type=semantic_type)
+        if self.fixed_primitives and str(semantic_type) == "e":
+            extension = FixedExtensionModule(semantic_type=semantic_type)
+        else:
+            extension = ExtensionModule(semantic_type=semantic_type)
+        semantics = SemanticIntensionPrimitive(name=entry_array[3], module=extension, semantic_type=semantic_type)
         return LexicalEntry(english, category, semantics)
 
     def parse_file(self, filename):

@@ -120,9 +120,9 @@ def taxi_example():
     print(lexicon.get_entry("inside").semantics.forward(image))
 
 
-def learning_propositions(epochs=20, batch_size=30, save=True):
+def learning_propositions(epochs=20, batch_size=30, save=True, fixed_primitives=False):
     # Semantics.HIDDEN_DIM = 32
-    lex_parser = LexiconParser()
+    lex_parser = LexiconParser(fixed_primitives=fixed_primitives)
     entries = lex_parser.parse_file("taxi_lexicon.txt")
     lexicon = Lexicon(list(set(entries)))
     grammar = Grammar()
@@ -170,13 +170,20 @@ def learning_propositions(epochs=20, batch_size=30, save=True):
     return losses, test_accuracy, train_accuracy
 
 
-def param_sweep():
+def param_sweep(fixed_primitives=False, epochs=30):
     hidden_dim_params = [2, 4, 8, 16, 32, 64, 128, 256][4:]
 
     for hd in hidden_dim_params:
         Semantics.HIDDEN_DIM = hd
-        losses, test_accuracy, train_accuracy = learning_propositions(epochs=30, save=False)
+        losses, test_accuracy, train_accuracy = learning_propositions(epochs=epochs, save=False, fixed_primitives=fixed_primitives)
         plt.plot(losses, label=f"hd={hd} test_acc={str(torch.mean(test_accuracy).tolist())[:5]}"
+                               f" train_acc={str(torch.mean(train_accuracy).tolist())[:5]}")
+
+    if fixed_primitives:
+        Semantics.HIDDEN_DIM = 256
+        losses, test_accuracy, train_accuracy = learning_propositions(epochs=epochs, save=False,
+                                                                      fixed_primitives=False)
+        plt.plot(losses, label=f"unfixed hd={256} test_acc={str(torch.mean(test_accuracy).tolist())[:5]}"
                                f" train_acc={str(torch.mean(train_accuracy).tolist())[:5]}")
 
     plt.xlabel('Iteration')
@@ -244,6 +251,7 @@ def probe():
 
 
 if __name__ == "__main__":
-    # param_sweep()
-    learning_propositions(save=False)
+    param_sweep(fixed_primitives=True, epochs=20)
+    # learning_propositions(save=False)
     # probe()
+    # fixed_non_fixed_comparison()

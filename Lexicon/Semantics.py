@@ -6,7 +6,7 @@ from torchvision.io import read_image
 from torchvision import transforms
 from functools import reduce
 
-HIDDEN_DIM = 256
+HIDDEN_DIM = 128
 
 
 def get_semantic_type_dims(semantic_type):
@@ -64,8 +64,8 @@ class UnFlatten(nn.Module):
         self.dims = dims
 
     def forward(self, x):
-        print(x.size())
-        print(self.dims)
+        # print(x.size())
+        # print(self.dims)
         out = x.view(*self.dims)
         # print(out.size())
         return out
@@ -115,6 +115,22 @@ class ExtensionModule(nn.Module):
     def forward(self, state):
         extension = self.intension(state)
         return extension
+
+
+class FixedExtensionModule(nn.Module):
+    def __init__(self, output_dims=None, semantic_type=None, image_channels=3, image_dim=32):
+        super().__init__()
+
+        self.semantic_type = semantic_type
+
+        if semantic_type is not None:
+            output_dims = get_semantic_type_dims(semantic_type)
+
+        # self.extension = torch.rand(tuple(abs(x) for x in output_dims))
+        self.extension = torch.normal(mean=0.0, std=0.33, size=tuple(abs(x) for x in output_dims))
+
+    def forward(self, state):
+        return self.extension
 
 
 class SemanticEntry(nn.Module):
@@ -170,8 +186,8 @@ class SemanticIntensionApplication(SemanticEntry):
     def forward(self, state):
         function = self.function_module.forward(state)
         argument = self.argument_module.forward(state)
-        print(argument.size())
-        print(function.size())
+        # print(argument.size())
+        # print(function.size())
         # print(self.function_module.semantic_type)
         # print(get_semantic_type_dims(self.function_module.semantic_type))
         # print(get_semantic_type_dims(self.argument_module.semantic_type))
