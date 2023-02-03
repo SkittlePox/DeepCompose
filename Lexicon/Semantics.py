@@ -126,11 +126,13 @@ class FixedExtensionModule(nn.Module):
         if semantic_type is not None:
             output_dims = get_semantic_type_dims(semantic_type)
 
+        self.output_dims = output_dims
+
         # self.extension = torch.rand(tuple(abs(x) for x in output_dims))
         self.extension = torch.normal(mean=0.0, std=0.33, size=tuple(abs(x) for x in output_dims))
 
     def forward(self, state):
-        return self.extension
+        return self.extension.expand(state.size()[0], -1, -1)   # For batching properly
 
 
 class SemanticEntry(nn.Module):

@@ -120,7 +120,7 @@ def taxi_example():
     print(lexicon.get_entry("inside").semantics.forward(image))
 
 
-def learning_propositions(epochs=20, batch_size=30, save=True, fixed_primitives=False):
+def learning_propositions(epochs=20, batch_size=30, save=True, fixed_primitives=True):
     # Semantics.HIDDEN_DIM = 32
     lex_parser = LexiconParser(fixed_primitives=fixed_primitives)
     entries = lex_parser.parse_file("taxi_lexicon.txt")
@@ -206,6 +206,7 @@ def probe():
 
     entry_names = [("taxi", 0), ("passenger", 1), ("destination", 2)]
     # entry_names = [("touching_north", 0), ("touching_south", 1), ("touching_east", 2), ("touching_west", 3)]
+    # entry_names = [("on(passenger)", 0), ("on(destination)", 1), ("inside(taxi)", 2)]
     entry_models = [lexicon.get_entry(e_name).semantics for e_name, _ in entry_names]
     [e_model.eval() for e_model in entry_models]
 
@@ -251,7 +252,6 @@ def probe():
 
 
 if __name__ == "__main__":
-    param_sweep(fixed_primitives=True, epochs=20)
-    # learning_propositions(save=False)
-    # probe()
-    # fixed_non_fixed_comparison()
+    # param_sweep(fixed_primitives=True, epochs=20)
+    # learning_propositions(epochs=20, save=False)
+    probe()
