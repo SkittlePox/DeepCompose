@@ -27,8 +27,8 @@ def proposition_distribution():
     ax.tick_params(axis='x', labelrotation=45)
     ax.axhline(y=0.5, color='r', linestyle='-')
 
-    ax.set_ylabel('Proportion of states when true')
-    ax.set_title('Distribution of Propositions over Taxi States')
+    ax.set_ylabel('ProporDistribution of Propositions over Taxi Statetion of states when true')
+    ax.set_title('s')
 
     plt.show()
 

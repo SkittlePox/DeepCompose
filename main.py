@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
+import mplcursors
 import numpy as np
 import torch.utils.data
+import torch
+import torchvision.transforms as transforms
 from sklearn import decomposition
 
 from Lexicon import *
@@ -116,6 +119,14 @@ def taxi_example():
     image = resize(image).type(torch.float)
     image = image.unsqueeze(0)
 
+    new_image = transforms.ToPILImage()(image.squeeze())
+    new_image = np.array(new_image)
+
+    new_image = 255 - new_image
+
+    plt.imshow(new_image)
+    plt.show()
+
     print(tnp.semantics.forward(image))
     print(lexicon.get_entry("inside").semantics.forward(image))
 
@@ -204,25 +215,29 @@ def probe():
     dataset = PropositionDataset(root_dir="./images/random_states/", label_dict=pickle.load(file))
     dataloader = DataLoader(dataset, batch_size=200, shuffle=False)
 
-    entry_names = [("taxi", 0), ("passenger", 1), ("destination", 2)]
-    # entry_names = [("touching_north", 0), ("touching_south", 1), ("touching_east", 2), ("touching_west", 3)]
+    # entry_names = [("taxi", 0), ("passenger", 1), ("destination", 2)]
+    entry_names = [("touching_north", 0), ("touching_south", 1), ("touching_east", 2), ("touching_west", 3)][:1]
     # entry_names = [("on(passenger)", 0), ("on(destination)", 1), ("inside(taxi)", 2)]
+
     entry_models = [lexicon.get_entry(e_name).semantics for e_name, _ in entry_names]
     [e_model.eval() for e_model in entry_models]
 
     preds = []
     labels = []
+    images = []
 
     for i, batch in enumerate(dataloader):
         X, y = batch[0], batch[1]
         with torch.no_grad():
             for i, e_model in enumerate(entry_models):
+                images.extend(X)
                 preds.append(e_model(X).squeeze())
                 labels.append(torch.ones((200,)) * i)
 
     X = torch.cat(preds)
     y = torch.cat(labels)
 
+    print(len(images))
     print(X.size())
     print(y.size())
 
@@ -231,11 +246,11 @@ def probe():
     pca.fit(X)
     X = pca.transform(X)
 
-    fig = plt.figure(1, figsize=(4, 3))
+    fig = plt.figure(2, figsize=(4, 3))
     plt.clf()
 
-    ax = fig.add_subplot(111, projection="3d", elev=48, azim=134)
-    ax.set_position([0, 0, 0.95, 1])
+    ax = fig.add_subplot(121, projection="3d", elev=48, azim=134)
+    # ax.set_position([0, 0, 0.95, 1])
 
     for name, label in entry_names:
         ax.text3D(
@@ -248,10 +263,27 @@ def probe():
         )
 
     ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=y, cmap=plt.cm.nipy_spectral, edgecolor="k")
+
+    cursor = mplcursors.cursor(ax, hover=True)
+
+    ax2 = fig.add_subplot(122)
+    image = images[0].type(torch.uint8)
+    new_image = transforms.ToPILImage()(image)
+    im = ax2.imshow(new_image)
+
+    @cursor.connect("add")
+    def on_add(sel):
+        # print(sel.index)
+        image = images[sel.index].type(torch.uint8)
+        image = transforms.ToPILImage()(image)
+        # ax2.imshow(image)
+        im.set_data(image)
+
     plt.show()
 
 
 if __name__ == "__main__":
-    param_sweep(fixed_primitives=True, epochs=20)
+    # param_sweep(fixed_primitives=True, epochs=20)
     # learning_propositions(epochs=20, save=False)
-    # probe()
+    probe()
+    # taxi_example()
