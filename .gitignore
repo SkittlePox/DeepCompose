@@ -131,3 +131,5 @@ dmypy.json
 images/
 lexicon.pkl
 propositions.pt
+
+.DS_Store
