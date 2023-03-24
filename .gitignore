@@ -132,4 +132,6 @@ images/
 lexicon.pkl
 propositions.pt
 
+*/.DS_Store
 .DS_Store
+.idea/
