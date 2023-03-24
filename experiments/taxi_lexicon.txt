@@ -1,9 +1,15 @@
-the taxi ; NP ; e ; taxi
-the passenger ; NP ; e ; passenger
-the destination ; NP ; e ; destination
+taxi ; N ; <e,t> ; taxi
+passenger ; N ; <e,t> ; passenger
+destination ; N ; <e,t> ; destination
 is touching wall to the north ; S/NP ; <e,t> ; touching_north
 is touching wall to the south ; S/NP ; <e,t> ; touching_south
 is touching wall to the east ; S/NP ; <e,t> ; touching_east
 is touching wall to the west ; S/NP ; <e,t> ; touching_west
 is on ; (S/NP)/NP ; <e,<e,t>> ; on
 is inside ; (S/NP)/NP ; <e,<e,t>> ; inside
+blue ; N ; <e,t> ; blue
+red ; N ; <e,t> ; red
+green ; N ; <e,t> ; green
+yellow ; N ; <e,t> ; yellow
+is ; (S/NP)/N ; <e,<e,t>> ; is
+the ; NP/N ; <<e,t>,e> ; the

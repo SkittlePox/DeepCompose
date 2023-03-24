@@ -11,7 +11,7 @@ HIDDEN_DIM = 8
 
 def get_semantic_type_dims(semantic_type):
     semantic_type_str = str(semantic_type)
-    semantic_type_dims_dict = {"e": (-1, 1, HIDDEN_DIM), "t": (-1, 1), "<e,t>": (-1, HIDDEN_DIM, 1),
+    semantic_type_dims_dict = {"e": (-1, 1, HIDDEN_DIM), "t": (-1, 1), "<e,t>": (-1, HIDDEN_DIM, 1), "<<e,t>,e>": (-1, HIDDEN_DIM, HIDDEN_DIM),
                                "<e,<e,t>>": (-1, HIDDEN_DIM, HIDDEN_DIM), "<<e,t>,<e,t>>": (-1, HIDDEN_DIM, HIDDEN_DIM)}
     return semantic_type_dims_dict[semantic_type_str]
 

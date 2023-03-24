@@ -29,15 +29,15 @@ def generate_random_states(env, num_states, save=True):
     for i in range(num_states):
         ob, _ = env.reset()
         ob = env.get_observation()
-        oo_state = env.get_oo_state()
+        oo_state = env.get_extended_oo_state()
 
         all_images.append(ob)
         all_oo_states[f"state-{i}"] = oo_state
 
         if save:
-            plt.imsave(f"../images/random_states/state-{i}.png", ob)
+            plt.imsave(f"../images/random_states_extended/state-{i}.png", ob)
     if save:
-        file = open('../images/random_states.pkl', 'wb')
+        file = open('../images/random_states_extended.pkl', 'wb')
         pickle.dump(all_oo_states, file)
 
 
@@ -97,5 +97,5 @@ env = TaxiEnv(exploring_starts=True,
 
 expert = TaxiExpert(env)
 
-generate_rollouts(env, agent=None, min_rollouts=5000, save=True)
-# generate_random_states(env, num_states=200)
+# generate_rollouts(env, agent=None, min_rollouts=500, save=True)
+generate_random_states(env, num_states=200)

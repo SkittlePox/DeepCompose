@@ -180,6 +180,38 @@ def learning_propositions(epochs=20, batch_size=30, save=True, fixed_primitives=
     return losses, test_accuracy, train_accuracy
 
 
+def learning_propositions_extended(epochs=20, batch_size=30, save=True, fixed_primitives=True):
+    # Semantics.HIDDEN_DIM = 32
+    lex_parser = dc.LexiconParser(fixed_primitives=fixed_primitives)
+    entries = lex_parser.parse_file("taxi_lexicon.txt")
+    lexicon = dc.Lexicon(list(set(entries)))
+    grammar = dc.Grammar()
+    interactor = dc.ProductionGenerator(grammar)
+    interactor.populate_lexicon(lexicon, layers=2)
+
+    # TERMS = ['touch_n(taxi, wall)', 'touch_s(taxi, wall)', 'touch_e(taxi, wall)',
+    #          'touch_w(taxi, wall)', 'on(taxi, passenger)',
+    #          'on(taxi, destination)', 'passenger.in_taxi']
+    # Additional terms: ['touch_n(passenger, wall)', 'touch_s(passenger, wall)', 'touch_e(passenger, wall)',
+    #                    'touch_w(passenger, wall)', 'is(passenger, blue)', 'is(passenger, green)',
+    #                    'is(passenger, red)', 'is(passenger, yellow)']
+
+    print(lexicon)
+
+    propositions = [lexicon.get_entry("touching_north(taxi)"),
+                    lexicon.get_entry("touching_south(taxi)"),
+                    lexicon.get_entry("touching_east(taxi)"),
+                    lexicon.get_entry("touching_west(taxi)"),
+                    lexicon.get_entry("on(passenger)(taxi)"),
+                    lexicon.get_entry("on(destination)(taxi)"),
+                    lexicon.get_entry("inside(taxi)(passenger)"),
+                    lexicon.get_entry("touching_north(passenger)"),
+                    lexicon.get_entry("touching_south(passenger)"),
+                    lexicon.get_entry("touching_east(passenger)"),
+                    lexicon.get_entry("touching_west(passenger)"),
+                    ]
+
+
 def param_sweep(fixed_primitives=False, epochs=30):
     hidden_dim_params = [2, 4, 8, 16, 32, 64, 128, 256][:]
 
@@ -283,6 +315,7 @@ def probe():
 
 if __name__ == "__main__":
     # param_sweep(fixed_primitives=True, epochs=20)
-    learning_propositions(epochs=10, save=False)
+    # learning_propositions(epochs=10, save=False)
+    learning_propositions_extended(epochs=10, save=False)
     # probe()
     # taxi_example()
