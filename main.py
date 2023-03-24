@@ -284,6 +284,6 @@ def probe():
 
 if __name__ == "__main__":
     # param_sweep(fixed_primitives=True, epochs=20)
-    # learning_propositions(epochs=20, save=False)
-    probe()
+    learning_propositions(epochs=10, save=False)
+    # probe()
     # taxi_example()
