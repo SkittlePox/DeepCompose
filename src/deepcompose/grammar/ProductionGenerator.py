@@ -1,5 +1,5 @@
 from copy import copy
-from Grammar import *
+from ..grammar import *
 
 
 class ProductionGenerator:
