@@ -46,7 +46,7 @@ class Lexicon:
         return None
 
     def __str__(self):
-        out = "=== Lexicon ===\n"
+        out = "=== lexicon ===\n"
         for e in self.entries:
             out = out + str(e) + "\n"
         return out + "==============="

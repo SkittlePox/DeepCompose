@@ -6,9 +6,8 @@ import torch
 import torchvision.transforms as transforms
 from sklearn import decomposition
 
-from Lexicon import *
-from Lexicon import Semantics
-from Grammar import *
+import deepcompose as dc
+
 from utils import *
 from tqdm import tqdm
 import torch.nn as nn
@@ -100,14 +99,14 @@ def evaluate(model, dataloader, device="cpu"):
 
 
 def taxi_example():
-    lex_parser = LexiconParser()
+    lex_parser = dc.LexiconParser()
     entries = lex_parser.parse_file("taxi_lexicon.txt")
-    lexicon = Lexicon(list(set(entries)))
+    lexicon = dc.Lexicon(list(set(entries)))
     print(lexicon)
     print(entries[2].semantics.semantic_type)
     # print(entries[2].semantics(entries[1].semantics))
-    grammar = Grammar()
-    interactor = ProductionGenerator(grammar)
+    grammar = dc.Grammar()
+    interactor = dc.ProductionGenerator(grammar)
     interactor.populate_lexicon(lexicon, layers=2)
     print("After populating:")
     print(lexicon)
@@ -133,11 +132,11 @@ def taxi_example():
 
 def learning_propositions(epochs=20, batch_size=30, save=True, fixed_primitives=True):
     # Semantics.HIDDEN_DIM = 32
-    lex_parser = LexiconParser(fixed_primitives=fixed_primitives)
+    lex_parser = dc.LexiconParser(fixed_primitives=fixed_primitives)
     entries = lex_parser.parse_file("taxi_lexicon.txt")
-    lexicon = Lexicon(list(set(entries)))
-    grammar = Grammar()
-    interactor = ProductionGenerator(grammar)
+    lexicon = dc.Lexicon(list(set(entries)))
+    grammar = dc.Grammar()
+    interactor = dc.ProductionGenerator(grammar)
     interactor.populate_lexicon(lexicon, layers=2)
 
     # TERMS = ['touch_n(taxi, wall)', 'touch_s(taxi, wall)', 'touch_e(taxi, wall)',
@@ -152,7 +151,7 @@ def learning_propositions(epochs=20, batch_size=30, save=True, fixed_primitives=
                     lexicon.get_entry("on(destination)(taxi)"),
                     lexicon.get_entry("inside(taxi)(passenger)")]
 
-    prop_module = PropositionSetModule(semantic_intensions=[prop.semantics for prop in propositions])
+    prop_module = dc.PropositionSetModule(semantic_intensions=[prop.semantics for prop in propositions])
 
     # resize = transforms.Resize(64)
     # image = read_image(f"taxi.png", torchvision.io.ImageReadMode.RGB)
@@ -185,7 +184,7 @@ def param_sweep(fixed_primitives=False, epochs=30):
     hidden_dim_params = [2, 4, 8, 16, 32, 64, 128, 256][:]
 
     for hd in hidden_dim_params:
-        Semantics.HIDDEN_DIM = hd
+        dc.Semantics.HIDDEN_DIM = hd
         losses, test_accuracy, train_accuracy = learning_propositions(epochs=epochs, save=False, fixed_primitives=fixed_primitives)
         plt.plot(losses, label=f"hd={hd} test_acc={str(torch.mean(test_accuracy).tolist())[:5]}"
                                f" train_acc={str(torch.mean(train_accuracy).tolist())[:5]}")

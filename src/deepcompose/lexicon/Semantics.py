@@ -118,6 +118,9 @@ class ExtensionModule(nn.Module):
 
 
 class FixedExtensionModule(nn.Module):
+    """
+    Used for lexical items whose semantic values should not change across inputs, like nouns. a rose is a rose is a rose
+    """
     def __init__(self, output_dims=None, semantic_type=None, image_channels=3, image_dim=32):
         super().__init__()
 
