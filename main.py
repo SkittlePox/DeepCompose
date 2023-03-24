@@ -107,7 +107,7 @@ def taxi_example():
     print(entries[2].semantics.semantic_type)
     # print(entries[2].semantics(entries[1].semantics))
     grammar = Grammar()
-    interactor = LexiconExpander(grammar)
+    interactor = ProductionGenerator(grammar)
     interactor.populate_lexicon(lexicon, layers=2)
     print("After populating:")
     print(lexicon)
@@ -137,7 +137,7 @@ def learning_propositions(epochs=20, batch_size=30, save=True, fixed_primitives=
     entries = lex_parser.parse_file("taxi_lexicon.txt")
     lexicon = Lexicon(list(set(entries)))
     grammar = Grammar()
-    interactor = LexiconExpander(grammar)
+    interactor = ProductionGenerator(grammar)
     interactor.populate_lexicon(lexicon, layers=2)
 
     # TERMS = ['touch_n(taxi, wall)', 'touch_s(taxi, wall)', 'touch_e(taxi, wall)',

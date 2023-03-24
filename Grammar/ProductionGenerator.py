@@ -2,7 +2,7 @@ from copy import copy
 from Grammar import *
 
 
-class LexiconExpander:
+class ProductionGenerator:
     def __init__(self, grammar):
         self.grammar = grammar
 
