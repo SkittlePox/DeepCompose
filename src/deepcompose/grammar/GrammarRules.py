@@ -1,8 +1,8 @@
-from Lexicon import *
+from ..lexicon import *
 
 
 ### R-1a
-from Lexicon import LexicalEntry
+# from Lexicon import LexicalEntry
 
 
 def R1a_test(a, b):
