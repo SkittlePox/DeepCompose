@@ -313,7 +313,7 @@ def probe():
     plt.show()
 
 
-def propositional_logic_experiment(epochs=20, batch_size=64, save=False):
+def propositional_logic_experiment(epochs=5, batch_size=128, save=False):
     model = dc.PropositionalPrimitive()
 
     trainA = CLEVR96ClassifierDataset(scene_file="../../clevr-refplus-dcplus-dataset-gen/output/scenes/clevr_ref+_cogent_trainA_scenes.json",

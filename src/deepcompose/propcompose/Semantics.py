@@ -1,1 +1,0 @@
-### This file contains the propositional logic functions, which boil down to propositional primitives.

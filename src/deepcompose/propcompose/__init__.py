@@ -1,2 +1,1 @@
-from .Primitives import *
-from .Semantics import *
+from .PropPrimitive import *
