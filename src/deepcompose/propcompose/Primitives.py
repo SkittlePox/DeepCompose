@@ -9,8 +9,17 @@ class PropositionalPrimitive(nn.Module):
 
     def __init__(self, image_dims, image_channels=3):
         self.semantics = nn.Sequential(
-            # TODO: Add convolutional layers for a 320 x 480 RGB image. Output a single boolean.
+            nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Flatten(),
+            nn.Linear(32 * 20 * 30, 256),
+            nn.ReLU(),
+            nn.Linear(256, 96)
         )
 
     def __forward__(self, x):
-        pass
+        return self.semantics(x)

@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 
 
-class PropositionDataset(Dataset):
+class MDPPropositionDataset(Dataset):
     def __init__(self, root_dir, label_dict):
         """
         For a given set of propositions, we get their truth values given a set of inputs (images from an environment).
@@ -32,7 +32,7 @@ class PropositionDataset(Dataset):
 
 def main():
     file = open('../images/random_states.pkl', 'rb')
-    dataset = PropositionDataset(root_dir="../images/random_states/", label_dict=pickle.load(file))
+    dataset = MDPPropositionDataset(root_dir="../images/random_states/", label_dict=pickle.load(file))
 
     print(dataset.__getitem__(1))
 
