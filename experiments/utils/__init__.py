@@ -1,1 +1,2 @@
-from .Dataset import *
+from .MDPDataset import *
+from .CLEVRDataset import *

@@ -1,0 +1,1 @@
+# TODO Make a dataloader for CLEVR. Start with Propositional semantics.
