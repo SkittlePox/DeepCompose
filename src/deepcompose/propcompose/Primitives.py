@@ -7,7 +7,8 @@ class PropositionalPrimitive(nn.Module):
     This is a primitive classifier from images to truth values.
     """
 
-    def __init__(self, image_dims, image_channels=3):
+    def __init__(self):
+        super().__init__()
         self.semantics = nn.Sequential(
             nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
@@ -21,5 +22,5 @@ class PropositionalPrimitive(nn.Module):
             nn.Linear(256, 96)
         )
 
-    def __forward__(self, x):
+    def forward(self, x):
         return self.semantics(x)

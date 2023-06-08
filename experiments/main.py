@@ -161,7 +161,7 @@ def learning_propositions(epochs=20, batch_size=30, save=True, fixed_primitives=
     # print(prop_module.forward(image))
 
     file = open('./images/random_states.pkl', 'rb')
-    dataset = PropositionDataset(root_dir="./images/random_states/", label_dict=pickle.load(file))
+    dataset = MDPPropositionDataset(root_dir="./images/random_states/", label_dict=pickle.load(file))
     train_set, test_set = torch.utils.data.random_split(dataset, [0.8, 0.2])
 
     # train_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
@@ -243,7 +243,7 @@ def probe():
     lexicon = pickle.load(open("lexicon.pkl", 'rb'))
 
     file = open('./images/random_states.pkl', 'rb')
-    dataset = PropositionDataset(root_dir="./images/random_states/", label_dict=pickle.load(file))
+    dataset = MDPPropositionDataset(root_dir="./images/random_states/", label_dict=pickle.load(file))
     dataloader = DataLoader(dataset, batch_size=200, shuffle=False)
 
     # entry_names = [("taxi", 0), ("passenger", 1), ("destination", 2)]
@@ -313,9 +313,40 @@ def probe():
     plt.show()
 
 
+def propositional_logic_experiment(epochs=20, batch_size=64, save=False):
+    model = dc.PropositionalPrimitive()
+
+    trainA = CLEVR96ClassifierDataset(scene_file="../../clevr-refplus-dcplus-dataset-gen/output/scenes/clevr_ref+_cogent_trainA_scenes.json",
+                                    images_dir="../../clevr-refplus-dcplus-dataset-gen/output/images/trainA/",
+                                    label_file="../../clevr-refplus-dcplus-dataset-gen/output/labels/clevr_ref+_cogent_trainA_labels.json")
+    valA = CLEVR96ClassifierDataset(scene_file="../../clevr-refplus-dcplus-dataset-gen/output/scenes/clevr_ref+_cogent_valA_scenes.json",
+                                    images_dir="../../clevr-refplus-dcplus-dataset-gen/output/images/valA/",
+                                    label_file="../../clevr-refplus-dcplus-dataset-gen/output/labels/clevr_ref+_cogent_valA_labels.json")
+    valB = CLEVR96ClassifierDataset(scene_file="../../clevr-refplus-dcplus-dataset-gen/output/scenes/clevr_ref+_cogent_valB_scenes.json",
+                                    images_dir="../../clevr-refplus-dcplus-dataset-gen/output/images/valB/",
+                                    label_file="../../clevr-refplus-dcplus-dataset-gen/output/labels/clevr_ref+_cogent_valB_labels.json")
+    
+    trainA_loader = DataLoader(trainA, batch_size=batch_size, shuffle=True)
+    valA_loader = DataLoader(valA, batch_size=batch_size, shuffle=True)
+    valB_loader = DataLoader(valB, batch_size=batch_size, shuffle=True)
+
+    _, losses = train(model, trainA_loader, num_epochs=epochs)
+    trainA_accuracy = evaluate(model, trainA_loader)
+    valA_accuracy = evaluate(model, valA_loader)
+    valB_accuracy = evaluate(model, valB_loader)
+
+    print(f"trainA accuracy: {trainA_accuracy}")
+    print(f"valA accuracy: {valA_accuracy}")
+    print(f"valB accuracy: {valB_accuracy}")
+
+    if save:
+        torch.save(model, 'saved_models/proposition_primitives.pt')
+
+
 if __name__ == "__main__":
     # param_sweep(fixed_primitives=True, epochs=20)
     # learning_propositions(epochs=10, save=False)
-    learning_propositions_extended(epochs=10, save=False)
+    # learning_propositions_extended(epochs=10, save=False)
     # probe()
     # taxi_example()
+    propositional_logic_experiment(save=True)
