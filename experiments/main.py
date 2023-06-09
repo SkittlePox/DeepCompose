@@ -343,10 +343,23 @@ def propositional_logic_experiment(epochs=5, batch_size=128, save=False):
         torch.save(model, 'saved_models/proposition_primitives.pt')
 
 
+def set_theoretic_experiment():
+    model = dc.SetAdjPrimitive()
+
+    # dataset = CLEVR96ClassifierDataset(scene_file="../../clevr-refplus-dcplus-dataset-gen/output/scenes/clevr_ref+_cogent_valA_scenes.json",
+    #                                    images_dir="../../clevr-refplus-dcplus-dataset-gen/output/images/valA/",
+    #                                    label_file="../../clevr-refplus-dcplus-dataset-gen/output/labels/clevr_ref+_cogent_valA_labels.json")
+
+    
+    
+    # print(model(dataset[0:5]))
+
+
 if __name__ == "__main__":
     # param_sweep(fixed_primitives=True, epochs=20)
     # learning_propositions(epochs=10, save=False)
     # learning_propositions_extended(epochs=10, save=False)
     # probe()
     # taxi_example()
-    propositional_logic_experiment(save=True)
+    # propositional_logic_experiment(save=True)
+    set_theoretic_experiment()

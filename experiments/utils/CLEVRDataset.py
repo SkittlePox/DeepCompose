@@ -41,7 +41,7 @@ class CLEVR96ClassifierDataset(Dataset):
         image = self.resize(image.type(torch.float))
         label = (torch.tensor(self.label_dict[img_fname]['96count'], dtype=torch.float) > 0).type(torch.float)
         return image, label
-
+    
 
 def main():
     # file = open('../images/random_states.pkl', 'rb')
