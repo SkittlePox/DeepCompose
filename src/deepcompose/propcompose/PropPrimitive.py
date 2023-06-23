@@ -2,7 +2,7 @@
 import torch
 import torch.nn as nn
 
-class PropositionalPrimitive(nn.Module):
+class OldPropositionalPrimitive(nn.Module):
     """
     This is a primitive classifier from images to truth values.
     """
@@ -24,3 +24,38 @@ class PropositionalPrimitive(nn.Module):
 
     def forward(self, x):
         return self.semantics(x)
+
+class PropositionalPrimitive(nn.Module):
+    """Just like OldPropositionalPrimitive, but it takes in a 60 by 60 grayscale image and outputs a 1 dimensional output."""
+
+    def __init__(self, digit):
+        super().__init__()
+        self.semantics = nn.Sequential(
+            nn.Conv2d(1, 32, kernel_size=3, stride=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(32, 64, kernel_size=3, stride=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Flatten(),
+            nn.Linear(14 * 14 * 64, 256),
+            nn.ReLU(),
+            nn.Linear(256, 1),
+        )
+        self.digit = digit
+
+    def forward(self, x):
+        return self.semantics(x)
+
+    def __str__(self):
+        return f"PropositionalPrimitive({self.digit})"
+
+class PropositionPrimitiveCollection(nn.Module):
+    """A bunch of PropositionalPrimitives put into one module"""
+
+    def __init__(self, primitives):
+        super().__init__()
+        self.semantics = nn.ModuleList(primitives)
+    
+    def forward(self, x):
+        return torch.cat([p(x) for p in self.semantics], dim=1)

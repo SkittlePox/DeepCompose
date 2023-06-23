@@ -322,7 +322,7 @@ def probe():
     plt.show()
 
 
-def propositional_logic_experiment(epochs=1, batch_size=128, save=False):
+def propositional_logic_experiment_clevr(epochs=1, batch_size=128, save=False):
     # model = dc.PropositionalPrimitive()
     model = torch.load("saved_models/proposition_primitives_0.pt")
     # model.to('cpu')
@@ -356,6 +356,16 @@ def propositional_logic_experiment(epochs=1, batch_size=128, save=False):
         torch.save(model, 'saved_models/proposition_primitives_0.pt')
 
 
+def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False):
+    # Create a PropositionPrimitive for each digit 0-4
+    
+    primitives = []
+    for i in range(5):
+        primitives.append(dc.PropositionalPrimitive(i))
+    
+    model = dc.PropositionPrimitiveCollection(primitives)
+
+
 
 if __name__ == "__main__":
     # param_sweep(fixed_primitives=True, epochs=20)
@@ -363,4 +373,4 @@ if __name__ == "__main__":
     # learning_propositions_extended(epochs=10, save=False)
     # probe()
     # taxi_example()
-    propositional_logic_experiment(batch_size=1024, save=False)
+    propositional_logic_experiment_emnist(batch_size=64, save=False)
