@@ -38,9 +38,10 @@ class PropositionalPrimitive(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Flatten(),
-            nn.Linear(14 * 14 * 64, 256),
+            nn.Linear(13 * 13 * 64, 256),
             nn.ReLU(),
             nn.Linear(256, 1),
+            nn.Sigmoid()
         )
         self.digit = digit
 

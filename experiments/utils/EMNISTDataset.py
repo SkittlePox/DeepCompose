@@ -30,9 +30,9 @@ class EMNISTClassifierDataset(Dataset):
 
     def __getitem__(self, item):
         img_fname = self.images_dir + self.fname_prefix + str(item) + '.png'
-        image = read_image(img_fname, torchvision.io.ImageReadMode.RGB)
+        image = read_image(img_fname, torchvision.io.ImageReadMode.GRAY)
         image = image.type(torch.float)
-        label = self.labels[item]
+        label = torch.from_numpy(self.labels[item]).type(torch.float)
         return image, label
 
 def main():
@@ -45,6 +45,8 @@ def main():
     image = image / 255.0
     plt.imshow(image)
     plt.show()
+
+    print(image.shape)
 
 if __name__ == "__main__":
     main()

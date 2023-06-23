@@ -23,7 +23,7 @@ def train(model, dataloader, num_epochs, plot=True, device="cuda"):
     :return torch.nn.Module model
     """
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.00001)
 
     mse_loss = nn.MSELoss()
     mae_loss = nn.L1Loss()
@@ -88,12 +88,14 @@ def evaluate(model, dataloader, device="cuda"):
         X, y = batch[0].to(device), batch[1].to(device)
         with torch.no_grad():
             pred = model(X)
-            pred = (pred > 0.5).float()
+            pred = (pred > 0.5)
+            y = y.type(torch.bool)
+            a = np.equal(pred.cpu().numpy(), y.cpu().numpy()).all(axis=1)
 
-        if total_accuracy is None:
-            total_accuracy = (torch.sum(torch.sum((pred==y).float(), dim=0)) == 96).float()
-        else:
-            total_accuracy += (torch.sum(torch.sum((pred==y).float(), dim=0)) == 96).float()
+            if total_accuracy is None:
+                total_accuracy = sum(a)
+            else:
+                total_accuracy += sum(a)
         
         # print(total_accuracy.shape)
 
@@ -356,14 +358,50 @@ def propositional_logic_experiment_clevr(epochs=1, batch_size=128, save=False):
         torch.save(model, 'saved_models/proposition_primitives_0.pt')
 
 
-def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False):
+def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, use_saved=False):
     # Create a PropositionPrimitive for each digit 0-4
+
+    if use_saved:
+        model = torch.load("saved_models/emnist_proposition_primitives_0.pt")
+        model.to('cpu')
+    else:
+        primitives = []
+        for i in range(5):
+            primitives.append(dc.PropositionalPrimitive(i))
+        
+        model = dc.PropositionPrimitiveCollection(primitives)
+
+    train_dataset = EMNISTClassifierDataset(num_samples=100,
+                                            labels_file='../../extended-mnist/output/mini_dataset/train_labels.pkl',
+                                            images_dir='../../extended-mnist/output/mini_dataset/train/',
+                                            fname_prefix='training_image_')
+
+    test_dataset = EMNISTClassifierDataset(num_samples=100,
+                                            labels_file='../../extended-mnist/output/mini_dataset/test_labels.pkl',
+                                            images_dir='../../extended-mnist/output/mini_dataset/test/',
+                                            fname_prefix='testing_image_')
     
-    primitives = []
-    for i in range(5):
-        primitives.append(dc.PropositionalPrimitive(i))
-    
-    model = dc.PropositionPrimitiveCollection(primitives)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+
+    train_accuracy = evaluate(model, train_loader, device='cpu')
+    test_accuracy = evaluate(model, test_loader, device='cpu')
+
+    print(f"train accuracy: {train_accuracy}")
+    print(f"test accuracy: {test_accuracy}")
+
+    _, losses = train(model, train_loader, num_epochs=epochs, device='cpu')
+    train_accuracy = evaluate(model, train_loader, device='cpu')
+    test_accuracy = evaluate(model, test_loader, device='cpu')
+
+    print(f"train accuracy: {train_accuracy}")
+    print(f"test accuracy: {test_accuracy}")
+
+    print(model.forward(train_dataset[0][0].unsqueeze(0)))
+
+    model.to('cpu')
+    if save:
+        torch.save(model, 'saved_models/emnist_proposition_primitives_0.pt')
 
 
 
@@ -373,4 +411,4 @@ if __name__ == "__main__":
     # learning_propositions_extended(epochs=10, save=False)
     # probe()
     # taxi_example()
-    propositional_logic_experiment_emnist(batch_size=64, save=False)
+    propositional_logic_experiment_emnist(epochs=20, batch_size=100, save=True)
