@@ -13,7 +13,7 @@ from tqdm import tqdm
 import torch.nn as nn
 
 
-def train(model, dataloader, num_epochs, plot=True, device="cpu"):
+def train(model, dataloader, num_epochs, plot=True, device="cuda"):
     """
     :param torch.nn.Module model: the model to be trained
     :param torch.utils.data.DataLoader dataloader: DataLoader containing training examples
@@ -27,6 +27,7 @@ def train(model, dataloader, num_epochs, plot=True, device="cpu"):
 
     mse_loss = nn.MSELoss()
     mae_loss = nn.L1Loss()
+    model.to(device)
     model.train()
 
     losses = []
@@ -56,12 +57,15 @@ def train(model, dataloader, num_epochs, plot=True, device="cpu"):
             # print(f"Batch loss: {loss}")
 
         print(f"Average loss: {average_loss / len(dataloader)}")
-        losses.append((average_loss / len(dataloader)).detach().numpy())
+        if device == "cuda":
+            losses.append((average_loss / len(dataloader)).cpu().detach().numpy())
+        else:
+            losses.append((average_loss / len(dataloader)).detach().numpy())
 
     return model, losses
 
 
-def evaluate(model, dataloader, device="cpu"):
+def evaluate(model, dataloader, device="cuda"):
     """ Evaluate a PyTorch Model
 
     :param torch.nn.Module model: the model to be evaluated
@@ -71,6 +75,7 @@ def evaluate(model, dataloader, device="cpu"):
     :return accuracy
     """
 
+    model.to(device)
     model.eval()
 
     print("Evaluating:")
@@ -86,11 +91,15 @@ def evaluate(model, dataloader, device="cpu"):
             pred = (pred > 0.5).float()
 
         if total_accuracy is None:
-            total_accuracy = torch.sum((pred==y).float(), dim=0)
+            total_accuracy = (torch.sum(torch.sum((pred==y).float(), dim=0)) == 96).float()
         else:
-            total_accuracy += torch.sum((pred==y).float(), dim=0)
+            total_accuracy += (torch.sum(torch.sum((pred==y).float(), dim=0)) == 96).float()
+        
+        # print(total_accuracy.shape)
 
         progress_bar.update(1)
+
+    print(total_accuracy)
 
     total_accuracy /= len(dataloader.dataset)
     print(total_accuracy)
@@ -313,24 +322,26 @@ def probe():
     plt.show()
 
 
-def propositional_logic_experiment(epochs=5, batch_size=128, save=False):
-    model = dc.PropositionalPrimitive()
+def propositional_logic_experiment(epochs=1, batch_size=128, save=False):
+    # model = dc.PropositionalPrimitive()
+    model = torch.load("saved_models/proposition_primitives_0.pt")
+    # model.to('cpu')
 
-    trainA = CLEVR96ClassifierDataset(scene_file="../../clevr-refplus-dcplus-dataset-gen/output/scenes/clevr_ref+_cogent_trainA_scenes.json",
-                                    images_dir="../../clevr-refplus-dcplus-dataset-gen/output/images/trainA/",
-                                    label_file="../../clevr-refplus-dcplus-dataset-gen/output/labels/clevr_ref+_cogent_trainA_labels.json")
-    valA = CLEVR96ClassifierDataset(scene_file="../../clevr-refplus-dcplus-dataset-gen/output/scenes/clevr_ref+_cogent_valA_scenes.json",
-                                    images_dir="../../clevr-refplus-dcplus-dataset-gen/output/images/valA/",
-                                    label_file="../../clevr-refplus-dcplus-dataset-gen/output/labels/clevr_ref+_cogent_valA_labels.json")
-    valB = CLEVR96ClassifierDataset(scene_file="../../clevr-refplus-dcplus-dataset-gen/output/scenes/clevr_ref+_cogent_valB_scenes.json",
-                                    images_dir="../../clevr-refplus-dcplus-dataset-gen/output/images/valB/",
-                                    label_file="../../clevr-refplus-dcplus-dataset-gen/output/labels/clevr_ref+_cogent_valB_labels.json")
+    trainA = CLEVR96ClassifierDataset(scene_file="/users/bspiegel/data/bspiegel/clevr-refplus-dcplus-dataset-gen/output/scenes/clevr_ref+_cogent_trainA_scenes.json",
+                                    images_dir="/users/bspiegel/data/bspiegel/clevr-refplus-dcplus-dataset-gen/output/images/trainA/",
+                                    label_file="/users/bspiegel/data/bspiegel/clevr-refplus-dcplus-dataset-gen/output/labels/clevr_ref+_cogent_trainA_labels.json")
+    valA = CLEVR96ClassifierDataset(scene_file="/users/bspiegel/data/bspiegel/clevr-refplus-dcplus-dataset-gen/output/scenes/clevr_ref+_cogent_valA_scenes.json",
+                                    images_dir="/users/bspiegel/data/bspiegel/clevr-refplus-dcplus-dataset-gen/output/images/valA/",
+                                    label_file="/users/bspiegel/data/bspiegel/clevr-refplus-dcplus-dataset-gen/output/labels/clevr_ref+_cogent_valA_labels.json")
+    valB = CLEVR96ClassifierDataset(scene_file="/users/bspiegel/data/bspiegel/clevr-refplus-dcplus-dataset-gen/output/scenes/clevr_ref+_cogent_valB_scenes.json",
+                                    images_dir="/users/bspiegel/data/bspiegel/clevr-refplus-dcplus-dataset-gen/output/images/valB/",
+                                    label_file="/users/bspiegel/data/bspiegel/clevr-refplus-dcplus-dataset-gen/output/labels/clevr_ref+_cogent_valB_labels.json")
     
     trainA_loader = DataLoader(trainA, batch_size=batch_size, shuffle=True)
     valA_loader = DataLoader(valA, batch_size=batch_size, shuffle=True)
     valB_loader = DataLoader(valB, batch_size=batch_size, shuffle=True)
 
-    _, losses = train(model, trainA_loader, num_epochs=epochs)
+    # _, losses = train(model, trainA_loader, num_epochs=epochs)
     trainA_accuracy = evaluate(model, trainA_loader)
     valA_accuracy = evaluate(model, valA_loader)
     valB_accuracy = evaluate(model, valB_loader)
@@ -339,20 +350,11 @@ def propositional_logic_experiment(epochs=5, batch_size=128, save=False):
     print(f"valA accuracy: {valA_accuracy}")
     print(f"valB accuracy: {valB_accuracy}")
 
+    model.to('cpu')
+
     if save:
-        torch.save(model, 'saved_models/proposition_primitives.pt')
+        torch.save(model, 'saved_models/proposition_primitives_0.pt')
 
-
-def set_theoretic_experiment():
-    model = dc.SetAdjPrimitive()
-
-    # dataset = CLEVR96ClassifierDataset(scene_file="../../clevr-refplus-dcplus-dataset-gen/output/scenes/clevr_ref+_cogent_valA_scenes.json",
-    #                                    images_dir="../../clevr-refplus-dcplus-dataset-gen/output/images/valA/",
-    #                                    label_file="../../clevr-refplus-dcplus-dataset-gen/output/labels/clevr_ref+_cogent_valA_labels.json")
-
-    
-    
-    # print(model(dataset[0:5]))
 
 
 if __name__ == "__main__":
@@ -361,5 +363,4 @@ if __name__ == "__main__":
     # learning_propositions_extended(epochs=10, save=False)
     # probe()
     # taxi_example()
-    # propositional_logic_experiment(save=True)
-    set_theoretic_experiment()
+    propositional_logic_experiment(batch_size=1024, save=False)
