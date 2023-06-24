@@ -15,8 +15,8 @@ import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter()
 
-# fstring = "../../extended-mnist/output/mini_exclude13"                   # Local
-fstring = "/users/bspiegel/data/bspiegel/extended-mnist/exclude23"    # For oscar
+fstring = "../../extended-mnist/output/mini_exclude13"                   # Local
+# fstring = "/users/bspiegel/data/bspiegel/extended-mnist/exclude23"    # For oscar
 
 def train(model, dataloader, num_epochs, plot=True, device="cuda"):
     """
@@ -115,13 +115,28 @@ def train_with_eval(model, train_dataloader, test_a_dataloader, test_b_dataloade
         writer.add_scalar("Loss/train", loss, epoch)
 
         # Now perform evaluation loop
-        train_accuracy = evaluate(model, train_dataloader, device=device)
-        test_a_accuracy = evaluate(model, test_a_dataloader, device=device)
-        test_b_accuracy = evaluate(model, test_b_dataloader, device=device)
+        train_accuracy, train_accuracy_digitwise = evaluate(model, train_dataloader, device=device)
+        test_a_accuracy, test_a_accuracy_digitwise = evaluate(model, test_a_dataloader, device=device)
+        test_b_accuracy, test_b_accuracy_digitwise = evaluate(model, test_b_dataloader, device=device)
 
-        writer.add_scalar("Accuracy/train", train_accuracy, epoch)
-        writer.add_scalar("Accuracy/test_a", test_a_accuracy, epoch)
-        writer.add_scalar("Accuracy/test_b", test_b_accuracy, epoch)
+        writer.add_scalars("OverallAccuracy/test_aggregate", {'test_a': test_a_accuracy, 'test_b': test_b_accuracy}, epoch)
+        writer.add_scalar("OverallAccuracy/train", train_accuracy, epoch)
+        writer.add_scalar("OverallAccuracy/test_a", test_a_accuracy, epoch)
+        writer.add_scalar("OverallAccuracy/test_b", test_b_accuracy, epoch)
+
+        for i in range(5):
+            writer.add_scalar(f"DigitwiseAccuracy/train_digit_{i}", train_accuracy_digitwise[i], epoch)
+            writer.add_scalar(f"DigitwiseAccuracy/test_a_digit_{i}", test_a_accuracy_digitwise[i], epoch)
+            writer.add_scalar(f"DigitwiseAccuracy/test_b_digit_{i}", test_b_accuracy_digitwise[i], epoch)
+
+        # train_accuracy_digitwise is a numpy array of size 5. We want to turn it into a dictionary where the keys are the indices and the values are the accuracies
+        train_accuracy_digitwise = {str(i): train_accuracy_digitwise[i] for i in range(len(train_accuracy_digitwise))}
+        test_a_accuracy_digitwise = {str(i): test_a_accuracy_digitwise[i] for i in range(len(test_a_accuracy_digitwise))}
+        test_b_accuracy_digitwise = {str(i): test_b_accuracy_digitwise[i] for i in range(len(test_b_accuracy_digitwise))}
+
+        writer.add_scalars("DigitwiseAccuracyAggregate/train_digitwise", train_accuracy_digitwise, epoch)
+        writer.add_scalars("DigitwiseAccuracyAggregate/test_a_digitwise", test_a_accuracy_digitwise, epoch)
+        writer.add_scalars("DigitwiseAccuracyAggregate/test_b_digitwise", test_b_accuracy_digitwise, epoch)
         writer.flush()
 
         if device == "cuda":
@@ -149,6 +164,7 @@ def evaluate(model, dataloader, device="cuda"):
     progress_bar = tqdm(range(len(dataloader)))
 
     total_accuracy = None
+    digitwise_accuracy = None
 
     for i, batch in enumerate(dataloader):
         X, y = batch[0].to(device), batch[1].to(device)
@@ -157,22 +173,30 @@ def evaluate(model, dataloader, device="cuda"):
             pred = (pred > 0.5)
             y = y.type(torch.bool)
             a = np.equal(pred.cpu().numpy(), y.cpu().numpy()).all(axis=1)
+            a_digitwise = np.equal(pred.cpu().numpy(), y.cpu().numpy()).astype(np.float64)
+            # sum a_digitwise along axis 1
+            a_digitwise = np.sum(a_digitwise, axis=0)
 
             if total_accuracy is None:
                 total_accuracy = sum(a)
+                digitwise_accuracy = a_digitwise
             else:
                 total_accuracy += sum(a)
+                digitwise_accuracy += a_digitwise
         
         # print(total_accuracy.shape)
 
         progress_bar.update(1)
 
     print(total_accuracy)
+    print(digitwise_accuracy)
 
     total_accuracy /= len(dataloader.dataset)
+    digitwise_accuracy /= len(dataloader.dataset)
     print(total_accuracy)
+    print(digitwise_accuracy)
 
-    return total_accuracy
+    return total_accuracy, digitwise_accuracy
 
 
 def taxi_example():
@@ -437,17 +461,17 @@ def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, u
         
         model = dc.PropositionPrimitiveCollection(primitives)
 
-    train_dataset = EMNISTClassifierDataset(num_samples=30000,
+    train_dataset = EMNISTClassifierDataset(num_samples=1000,
                                             labels_file=fstring+'/train_labels.pkl',
                                             images_dir=fstring+'/train/',
                                             fname_prefix='image_')
 
-    test_a_dataset = EMNISTClassifierDataset(num_samples=5000,
+    test_a_dataset = EMNISTClassifierDataset(num_samples=200,
                                             labels_file=fstring+'/test_a_labels.pkl',
                                             images_dir=fstring+'/testa/',
                                             fname_prefix='image_')
     
-    test_b_dataset = EMNISTClassifierDataset(num_samples=5000,
+    test_b_dataset = EMNISTClassifierDataset(num_samples=200,
                                             labels_file=fstring+'/test_b_labels.pkl',
                                             images_dir=fstring+'/testb/',
                                             fname_prefix='image_')
@@ -456,8 +480,7 @@ def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, u
     test_a_loader = DataLoader(test_a_dataset, batch_size=batch_size, shuffle=True)
     test_b_loader = DataLoader(test_b_dataset, batch_size=batch_size, shuffle=True)
 
-    _, losses = train_with_eval(model, train_loader, test_a_loader, test_b_loader, num_epochs=epochs, device='cuda')
-    writer.flush()
+    _, losses = train_with_eval(model, train_loader, test_a_loader, test_b_loader, num_epochs=epochs, device='cpu')
 
     # train_accuracy = evaluate(model, train_loader, device='cpu')
     # test_a_accuracy = evaluate(model, test_a_loader, device='cpu')
@@ -492,4 +515,4 @@ if __name__ == "__main__":
     # learning_propositions_extended(epochs=10, save=False)
     # probe()
     # taxi_example()
-    propositional_logic_experiment_emnist(epochs=50, batch_size=64, save=True)
+    propositional_logic_experiment_emnist(epochs=10, batch_size=64, save=False)
