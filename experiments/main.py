@@ -15,6 +15,8 @@ import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter()
 
+# fstring = "../../extended-mnist/output/mini_exclude13"                   # Local
+fstring = "/users/bspiegel/data/bspiegel/extended-mnist/exclude13"    # For oscar
 
 def train(model, dataloader, num_epochs, plot=True, device="cuda"):
     """
@@ -435,26 +437,26 @@ def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, u
         
         model = dc.PropositionPrimitiveCollection(primitives)
 
-    train_dataset = EMNISTClassifierDataset(num_samples=1000,
-                                            labels_file='../../extended-mnist/output/mini_exclude13/train_labels.pkl',
-                                            images_dir='../../extended-mnist/output/mini_exclude13/train/',
+    train_dataset = EMNISTClassifierDataset(num_samples=30000,
+                                            labels_file=fstring+'/train_labels.pkl',
+                                            images_dir=fstring+'/train/',
                                             fname_prefix='image_')
 
-    test_a_dataset = EMNISTClassifierDataset(num_samples=200,
-                                            labels_file='../../extended-mnist/output/mini_exclude13/test_a_labels.pkl',
-                                            images_dir='../../extended-mnist/output/mini_exclude13/testa/',
+    test_a_dataset = EMNISTClassifierDataset(num_samples=5000,
+                                            labels_file=fstring+'/test_a_labels.pkl',
+                                            images_dir=fstring+'/testa/',
                                             fname_prefix='image_')
     
-    test_b_dataset = EMNISTClassifierDataset(num_samples=200,
-                                            labels_file='../../extended-mnist/output/mini_exclude13/test_b_labels.pkl',
-                                            images_dir='../../extended-mnist/output/mini_exclude13/testb/',
+    test_b_dataset = EMNISTClassifierDataset(num_samples=5000,
+                                            labels_file=fstring+'/test_b_labels.pkl',
+                                            images_dir=fstring+'/testb/',
                                             fname_prefix='image_')
     
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_a_loader = DataLoader(test_a_dataset, batch_size=batch_size, shuffle=True)
     test_b_loader = DataLoader(test_b_dataset, batch_size=batch_size, shuffle=True)
 
-    _, losses = train_with_eval(model, train_loader, test_a_loader, test_b_loader, num_epochs=epochs, device='cpu')
+    _, losses = train_with_eval(model, train_loader, test_a_loader, test_b_loader, num_epochs=epochs, device='cuda')
     writer.flush()
 
     # train_accuracy = evaluate(model, train_loader, device='cpu')
@@ -479,7 +481,7 @@ def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, u
 
     model.to('cpu')
     if save:
-        torch.save(model, 'saved_models/emnist_proposition_primitives_0.pt')
+        torch.save(model, 'saved_models/emnist_proposition_primitives_exclude13_50epochs.pt')
     writer.close()
 
 
@@ -490,4 +492,4 @@ if __name__ == "__main__":
     # learning_propositions_extended(epochs=10, save=False)
     # probe()
     # taxi_example()
-    propositional_logic_experiment_emnist(epochs=20, batch_size=64, save=False)
+    propositional_logic_experiment_emnist(epochs=50, batch_size=64, save=True)
