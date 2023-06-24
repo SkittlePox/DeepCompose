@@ -16,7 +16,7 @@ from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter()
 
 # fstring = "../../extended-mnist/output/mini_exclude13"                   # Local
-fstring = "/users/bspiegel/data/bspiegel/extended-mnist/exclude13"    # For oscar
+fstring = "/users/bspiegel/data/bspiegel/extended-mnist/exclude23"    # For oscar
 
 def train(model, dataloader, num_epochs, plot=True, device="cuda"):
     """
@@ -83,7 +83,7 @@ def train_with_eval(model, train_dataloader, test_a_dataloader, test_b_dataloade
     :return torch.nn.Module model
     """
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.00001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.000001)
 
     mse_loss = nn.MSELoss()
     # mae_loss = nn.L1Loss()
@@ -481,7 +481,7 @@ def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, u
 
     model.to('cpu')
     if save:
-        torch.save(model, 'saved_models/emnist_proposition_primitives_exclude13_50epochs.pt')
+        torch.save(model, 'saved_models/emnist_proposition_primitives_exclude23_50epochs.pt')
     writer.close()
 
 
