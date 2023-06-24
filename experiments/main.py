@@ -16,7 +16,7 @@ from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter()
 
 
-def train(model, dataloader, num_epochs, plot=True, device="cuda", writer_label="Loss/train"):
+def train(model, dataloader, num_epochs, plot=True, device="cuda"):
     """
     :param torch.nn.Module model: the model to be trained
     :param torch.utils.data.DataLoader dataloader: DataLoader containing training examples
@@ -50,7 +50,7 @@ def train(model, dataloader, num_epochs, plot=True, device="cuda", writer_label=
 
             # loss = nn.functional.nll_loss(pred.transpose(1, 2), y, ignore_index=QUERY_PAD_INDEX)
             loss = mse_loss(pred, y)
-            # writer.add_scalar(writer_label, loss, epoch)
+            # writer.add_scalar("Loss/train", loss, epoch)
             progress_bar.update(1)
             average_loss += loss
 
@@ -68,6 +68,66 @@ def train(model, dataloader, num_epochs, plot=True, device="cuda", writer_label=
 
     return model, losses
 
+
+def train_with_eval(model, train_dataloader, test_a_dataloader, test_b_dataloader, num_epochs, device="cuda"):
+    """
+    :param torch.nn.Module model: the model to be trained
+    :param torch.utils.data.DataLoader train_dataloader: DataLoader containing training examples
+    :param torch.utils.data.DataLoader test_a_dataloader: DataLoader containing testing examples
+    :param torch.utils.data.DataLoader test_b_dataloader: DataLoader containing testing examples
+    :param int num_epochs: number of epochs to train for
+    :param torch.device device: the device that we'll be training on
+
+    :return torch.nn.Module model
+    """
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.00001)
+
+    mse_loss = nn.MSELoss()
+    # mae_loss = nn.L1Loss()
+    model.to(device)
+    model.train()
+
+    losses = []
+
+    for epoch in range(num_epochs):
+        print(f"Epoch {epoch + 1} training:")
+        progress_bar = tqdm(range(len(train_dataloader)))
+        average_loss = 0.0
+
+        for i, batch in enumerate(train_dataloader):
+            X, y = batch[0].to(device), batch[1].to(device)
+
+            optimizer.zero_grad()
+            pred = model(X)
+
+            loss = mse_loss(pred, y)
+            progress_bar.update(1)
+            average_loss += loss
+
+            loss.backward()
+            # nn.utils.clip_grad_norm_(model.parameters(), 5)
+            optimizer.step()
+
+        print(f"Average loss: {average_loss / len(train_dataloader)}")
+        writer.add_scalar("Loss/train", loss, epoch)
+
+        # Now perform evaluation loop
+        train_accuracy = evaluate(model, train_dataloader, device=device)
+        test_a_accuracy = evaluate(model, test_a_dataloader, device=device)
+        test_b_accuracy = evaluate(model, test_b_dataloader, device=device)
+
+        writer.add_scalar("Accuracy/train", train_accuracy, epoch)
+        writer.add_scalar("Accuracy/test_a", test_a_accuracy, epoch)
+        writer.add_scalar("Accuracy/test_b", test_b_accuracy, epoch)
+        writer.flush()
+
+        if device == "cuda":
+            losses.append((average_loss / len(train_dataloader)).cpu().detach().numpy())
+        else:
+            losses.append((average_loss / len(train_dataloader)).detach().numpy())
+
+    return model, losses
 
 def evaluate(model, dataloader, device="cuda"):
     """ Evaluate a PyTorch Model
@@ -394,30 +454,33 @@ def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, u
     test_a_loader = DataLoader(test_a_dataset, batch_size=batch_size, shuffle=True)
     test_b_loader = DataLoader(test_b_dataset, batch_size=batch_size, shuffle=True)
 
-    train_accuracy = evaluate(model, train_loader, device='cpu')
-    test_a_accuracy = evaluate(model, test_a_loader, device='cpu')
-    test_b_accuracy = evaluate(model, test_b_loader, device='cpu')
+    _, losses = train_with_eval(model, train_loader, test_a_loader, test_b_loader, num_epochs=epochs, device='cpu')
+    writer.flush()
 
-    print(f"train accuracy: {train_accuracy}")
-    print(f"test a accuracy: {test_a_accuracy}")
-    print(f"test b accuracy: {test_b_accuracy}")
+    # train_accuracy = evaluate(model, train_loader, device='cpu')
+    # test_a_accuracy = evaluate(model, test_a_loader, device='cpu')
+    # test_b_accuracy = evaluate(model, test_b_loader, device='cpu')
 
-    _, losses = train(model, train_loader, num_epochs=epochs, device='cpu')
+    # print(f"train accuracy: {train_accuracy}")
+    # print(f"test a accuracy: {test_a_accuracy}")
+    # print(f"test b accuracy: {test_b_accuracy}")
+
+    # _, losses = train(model, train_loader, num_epochs=epochs, device='cpu')
     # writer.flush()
-    train_accuracy = evaluate(model, train_loader, device='cpu')
-    test_a_accuracy = evaluate(model, test_a_loader, device='cpu')
-    test_b_accuracy = evaluate(model, test_b_loader, device='cpu')
+    # train_accuracy = evaluate(model, train_loader, device='cpu')
+    # test_a_accuracy = evaluate(model, test_a_loader, device='cpu')
+    # test_b_accuracy = evaluate(model, test_b_loader, device='cpu')
 
-    print(f"train accuracy: {train_accuracy}")
-    print(f"test a accuracy: {test_a_accuracy}")
-    print(f"test b accuracy: {test_b_accuracy}")
+    # print(f"train accuracy: {train_accuracy}")
+    # print(f"test a accuracy: {test_a_accuracy}")
+    # print(f"test b accuracy: {test_b_accuracy}")
 
-    print(model.forward(train_dataset[0][0].unsqueeze(0)))
+    # print(model.forward(train_dataset[0][0].unsqueeze(0)))
 
     model.to('cpu')
     if save:
         torch.save(model, 'saved_models/emnist_proposition_primitives_0.pt')
-    # writer.close()
+    writer.close()
 
 
 
@@ -427,4 +490,4 @@ if __name__ == "__main__":
     # learning_propositions_extended(epochs=10, save=False)
     # probe()
     # taxi_example()
-    propositional_logic_experiment_emnist(epochs=50, batch_size=64, save=False)
+    propositional_logic_experiment_emnist(epochs=20, batch_size=64, save=False)
