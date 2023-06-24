@@ -15,8 +15,8 @@ import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter()
 
-fstring = "../../extended-mnist/output/mini_exclude13"                   # Local
-# fstring = "/users/bspiegel/data/bspiegel/extended-mnist/exclude23"    # For oscar
+# fstring = "../../extended-mnist/output/mini_exclude13"                   # Local
+fstring = "/users/bspiegel/data/bspiegel/extended-mnist/exclude23"    # For oscar
 
 def train(model, dataloader, num_epochs, plot=True, device="cuda"):
     """
@@ -480,7 +480,7 @@ def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, u
     test_a_loader = DataLoader(test_a_dataset, batch_size=batch_size, shuffle=True)
     test_b_loader = DataLoader(test_b_dataset, batch_size=batch_size, shuffle=True)
 
-    _, losses = train_with_eval(model, train_loader, test_a_loader, test_b_loader, num_epochs=epochs, device='cpu')
+    _, losses = train_with_eval(model, train_loader, test_a_loader, test_b_loader, num_epochs=epochs, device='cuda')
 
     # train_accuracy = evaluate(model, train_loader, device='cpu')
     # test_a_accuracy = evaluate(model, test_a_loader, device='cpu')
@@ -504,7 +504,7 @@ def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, u
 
     model.to('cpu')
     if save:
-        torch.save(model, 'saved_models/emnist_proposition_primitives_exclude23_50epochs.pt')
+        torch.save(model, 'saved_models/emnist_proposition_primitives_exclude23_50epochs_smallnet.pt')
     writer.close()
 
 
@@ -515,4 +515,4 @@ if __name__ == "__main__":
     # learning_propositions_extended(epochs=10, save=False)
     # probe()
     # taxi_example()
-    propositional_logic_experiment_emnist(epochs=10, batch_size=64, save=False)
+    propositional_logic_experiment_emnist(epochs=50, batch_size=64, save=True)

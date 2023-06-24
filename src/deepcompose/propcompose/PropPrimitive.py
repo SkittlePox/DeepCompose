@@ -30,15 +30,27 @@ class PropositionalPrimitive(nn.Module):
 
     def __init__(self, digit):
         super().__init__()
+
+        # self.semantics = nn.Sequential(       # These may be too powerful for our purposes.
+        #     nn.Conv2d(1, 32, kernel_size=3, stride=1),
+        #     nn.ReLU(),
+        #     nn.MaxPool2d(kernel_size=2, stride=2),
+        #     nn.Conv2d(32, 64, kernel_size=3, stride=1),
+        #     nn.ReLU(),
+        #     nn.MaxPool2d(kernel_size=2, stride=2),
+        #     nn.Flatten(),
+        #     nn.Linear(13 * 13 * 64, 256),
+        #     nn.ReLU(),
+        #     nn.Linear(256, 1),
+        #     nn.Sigmoid()
+        # )
+
         self.semantics = nn.Sequential(
             nn.Conv2d(1, 32, kernel_size=3, stride=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(32, 64, kernel_size=3, stride=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Flatten(),
-            nn.Linear(13 * 13 * 64, 256),
+            nn.Linear(29 * 29 * 32, 256),
             nn.ReLU(),
             nn.Linear(256, 1),
             nn.Sigmoid()
