@@ -45,14 +45,30 @@ class PropositionalPrimitive(nn.Module):
         #     nn.Sigmoid()
         # )
 
-        self.semantics = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=3, stride=1),
+        # self.semantics = nn.Sequential(       # These are too weak
+        #     nn.Conv2d(1, 32, kernel_size=3, stride=1),
+        #     nn.ReLU(),
+        #     nn.MaxPool2d(kernel_size=2, stride=2),
+        #     nn.Flatten(),
+        #     nn.Linear(29 * 29 * 32, 256),
+        #     nn.ReLU(),
+        #     nn.Linear(256, 1),
+        #     nn.Sigmoid()
+        # )
+
+        self.semantics = nn.Sequential(         # This is almost LeNet
+            nn.Conv2d(1, 6, kernel_size=5),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(6, 16, kernel_size=5),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Flatten(),
-            nn.Linear(29 * 29 * 32, 256),
+            nn.Linear(16 * 12 * 12, 120),
             nn.ReLU(),
-            nn.Linear(256, 1),
+            nn.Linear(120, 84),
+            nn.ReLU(),
+            nn.Linear(84, 1),
             nn.Sigmoid()
         )
         self.digit = digit

@@ -188,8 +188,8 @@ def evaluate(model, dataloader, device="cuda"):
 
         progress_bar.update(1)
 
-    print(total_accuracy)
-    print(digitwise_accuracy)
+    # print(total_accuracy)
+    # print(digitwise_accuracy)
 
     total_accuracy /= len(dataloader.dataset)
     digitwise_accuracy /= len(dataloader.dataset)
@@ -461,17 +461,17 @@ def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, u
         
         model = dc.PropositionPrimitiveCollection(primitives)
 
-    train_dataset = EMNISTClassifierDataset(num_samples=1000,
+    train_dataset = EMNISTClassifierDataset(num_samples=30000,
                                             labels_file=fstring+'/train_labels.pkl',
                                             images_dir=fstring+'/train/',
                                             fname_prefix='image_')
 
-    test_a_dataset = EMNISTClassifierDataset(num_samples=200,
+    test_a_dataset = EMNISTClassifierDataset(num_samples=5000,
                                             labels_file=fstring+'/test_a_labels.pkl',
                                             images_dir=fstring+'/testa/',
                                             fname_prefix='image_')
     
-    test_b_dataset = EMNISTClassifierDataset(num_samples=200,
+    test_b_dataset = EMNISTClassifierDataset(num_samples=5000,
                                             labels_file=fstring+'/test_b_labels.pkl',
                                             images_dir=fstring+'/testb/',
                                             fname_prefix='image_')
@@ -504,7 +504,7 @@ def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, u
 
     model.to('cpu')
     if save:
-        torch.save(model, 'saved_models/emnist_proposition_primitives_exclude23_50epochs_smallnet.pt')
+        torch.save(model, 'saved_models/emnist_proposition_primitives_exclude23_50epochs_lenet.pt')
     writer.close()
 
 
