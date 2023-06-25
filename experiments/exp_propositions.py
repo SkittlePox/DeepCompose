@@ -16,11 +16,8 @@ import torch.nn as nn
 
 from torch.utils.tensorboard import SummaryWriter
 
-comment = "exclude23b_10epochs_smallnet_test"
-writer = SummaryWriter(comment=comment)
-
-# fstring = "../../extended-mnist/output/mini_exclude13"                   # Local
-fstring = "/users/bspiegel/data/bspiegel/extended-mnist/exclude23_balanced"    # For oscar
+# fstring = "../../extended-mnist/output/"                   # Local
+fstring = "/users/bspiegel/data/bspiegel/extended-mnist/"    # For oscar
 
 def train(model, dataloader, num_epochs, plot=True, device="cuda"):
     """
@@ -75,7 +72,7 @@ def train(model, dataloader, num_epochs, plot=True, device="cuda"):
     return model, losses
 
 
-def train_with_eval(model, train_dataloader, test_a_dataloader, test_b_dataloader, num_epochs, device="cuda"):
+def train_with_eval(model, train_dataloader, test_a_dataloader, test_b_dataloader, num_epochs, writer, device="cuda"):
     """
     :param torch.nn.Module model: the model to be trained
     :param torch.utils.data.DataLoader train_dataloader: DataLoader containing training examples
@@ -451,61 +448,12 @@ def propositional_logic_experiment_clevr(epochs=1, batch_size=128, save=False):
         torch.save(model, 'saved_models/proposition_primitives_0.pt')
 
 
-def propositional_logic_experiment_emnist_simple(epochs=1, batch_size=64, save=False, use_saved=False):
+def propositional_logic_experiment_emnist(dataset, architecture, additional_comment="", epochs=1, batch_size=64, save=False, use_saved=False, device="cuda", mini=False):
+    comment = "exclude23b_10epochs_smallnet_test"
+    writer = SummaryWriter(comment=comment)
+    # dataset = "exclude23b"
 
-    if use_saved:
-        model = torch.load("saved_models/emnist_proposition_primitives_0.pt")
-        model.to('cpu')
-    else:
-        primitives = []
-        for i in range(5):
-            primitives.append(dc.PropositionalPrimitive(i))
-        
-        model = dc.PropositionPrimitiveCollection(primitives)
-
-    train_dataset = EMNISTClassifierDataset(num_samples=30000,
-                                            labels_file=fstring+'/train_labels.pkl',
-                                            images_dir=fstring+'/train/',
-                                            fname_prefix='image_')
-
-    test_a_dataset = EMNISTClassifierDataset(num_samples=5000,
-                                            labels_file=fstring+'/test_a_labels.pkl',
-                                            images_dir=fstring+'/testa/',
-                                            fname_prefix='image_')
     
-    test_b_dataset = EMNISTClassifierDataset(num_samples=5000,
-                                            labels_file=fstring+'/test_b_labels.pkl',
-                                            images_dir=fstring+'/testb/',
-                                            fname_prefix='image_')
-    
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    test_a_loader = DataLoader(test_a_dataset, batch_size=batch_size, shuffle=True)
-    test_b_loader = DataLoader(test_b_dataset, batch_size=batch_size, shuffle=True)
-
-    train_accuracy = evaluate(model, train_loader, device='cpu')
-    test_a_accuracy = evaluate(model, test_a_loader, device='cpu')
-    test_b_accuracy = evaluate(model, test_b_loader, device='cpu')
-
-    print(f"train accuracy: {train_accuracy}")
-    print(f"test a accuracy: {test_a_accuracy}")
-    print(f"test b accuracy: {test_b_accuracy}")
-
-    _, losses = train(model, train_loader, num_epochs=epochs, device='cpu')
-    writer.flush()
-    train_accuracy = evaluate(model, train_loader, device='cpu')
-    test_a_accuracy = evaluate(model, test_a_loader, device='cpu')
-    test_b_accuracy = evaluate(model, test_b_loader, device='cpu')
-
-    print(f"train accuracy: {train_accuracy}")
-    print(f"test a accuracy: {test_a_accuracy}")
-    print(f"test b accuracy: {test_b_accuracy}")
-
-    model.to('cpu')
-    if save:
-        torch.save(model, f'saved_models/emnist_proposition_primitives_{comment}.pt')
-
-
-def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, use_saved=False, device="cuda"):
     # Create a PropositionPrimitive for each digit 0-4
 
     if use_saved:
@@ -514,30 +462,30 @@ def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, u
     else:
         primitives = []
         for i in range(5):
-            primitives.append(dc.PropositionalPrimitive(i))
+            primitives.append(dc.PropositionalPrimitive(i), architecture=architecture)
         
         model = dc.PropositionPrimitiveCollection(primitives)
 
-    train_dataset = EMNISTClassifierDataset(num_samples=30000,
-                                            labels_file=fstring+'/train_labels.pkl',
-                                            images_dir=fstring+'/train/',
+    train_dataset = EMNISTClassifierDataset(num_samples=30000 if not mini else 1000,
+                                            labels_file=fstring+dataset+'/train_labels.pkl',
+                                            images_dir=fstring+dataset+'/train/',
                                             fname_prefix='image_')
 
-    test_a_dataset = EMNISTClassifierDataset(num_samples=5000,
-                                            labels_file=fstring+'/test_a_labels.pkl',
-                                            images_dir=fstring+'/testa/',
+    test_a_dataset = EMNISTClassifierDataset(num_samples=5000 if not mini else 200,
+                                            labels_file=fstring+dataset+'/test_a_labels.pkl',
+                                            images_dir=fstring+dataset+'/testa/',
                                             fname_prefix='image_')
     
-    test_b_dataset = EMNISTClassifierDataset(num_samples=5000,
-                                            labels_file=fstring+'/test_b_labels.pkl',
-                                            images_dir=fstring+'/testb/',
+    test_b_dataset = EMNISTClassifierDataset(num_samples=5000 if not mini else 200,
+                                            labels_file=fstring+dataset+'/test_b_labels.pkl',
+                                            images_dir=fstring+dataset+'/testb/',
                                             fname_prefix='image_')
     
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_a_loader = DataLoader(test_a_dataset, batch_size=batch_size, shuffle=True)
     test_b_loader = DataLoader(test_b_dataset, batch_size=batch_size, shuffle=True)
 
-    _, losses = train_with_eval(model, train_loader, test_a_loader, test_b_loader, num_epochs=epochs, device=device)
+    _, losses = train_with_eval(model, train_loader, test_a_loader, test_b_loader, num_epochs=epochs, writer=writer, device=device)
     writer.close()
 
     if save:
@@ -545,6 +493,14 @@ def propositional_logic_experiment_emnist(epochs=1, batch_size=64, save=False, u
         torch.save(model, f'saved_models/emnist_proposition_primitives_{comment}.pt')
 
 
+# List of datasets:
+# exclude23b - 30000 train, 5000 testA, 5000 testB, exclude 2,3 from train and testA
+# exclude04b - 30000 train, 5000 testA, 5000 testB, exclude 0,4 from train and testA
+# exclude13b - 30000 train, 5000 testA, 5000 testB, exclude 1,3 from train and testA
+
+# List of architectures:
+# smallnet - 1 conv layer, 2 ff layers
+# lenet - 2 conv layers, 3 ff layers
 
 
 if __name__ == "__main__":
@@ -553,7 +509,24 @@ if __name__ == "__main__":
     # learning_propositions_extended(epochs=10, save=False)
     # probe()
     # taxi_example()
-    # propositional_logic_experiment_emnist(epochs=10, batch_size=64, save=False, device='cuda')
 
     parser = argparse.ArgumentParser(description='Description of your program')
+    parser.add_argument('-a','--architecture', help='Architecture to use', required=True, default='smallnet', type=str)
+    parser.add_argument('-ds','--dataset', help='Dataset to use', required=True, default='exclude23b', type=str)
+    
+    parser.add_argument('-e','--epochs', help='Number of epochs to train for', required=False, default=50, type=int)
+    parser.add_argument('-b','--batch_size', help='Batch size', required=False, default=64, type=int)
+    parser.add_argument('-s','--save', help='Save the model', required=False, default=False, type=bool)
+    parser.add_argument('-u','--use_saved', help='Use a saved model', required=False, default=False, type=bool)
+    parser.add_argument('-d','--device', help='Device to use', required=False, default='cuda', type=str)    
+    parser.add_argument('-c','--additional_comment', help='Additional comments save', required=False, default='', type=str)
+
+
+    args = vars(parser.parse_args())
+
+    print(args)
+
+    # propositional_logic_experiment_emnist(**args)
+
+    
     
