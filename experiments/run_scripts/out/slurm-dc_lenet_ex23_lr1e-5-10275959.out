@@ -1,0 +1,192 @@
+## SLURM PROLOG ###############################################################
+##    Job ID : 10275959
+##  Job Name : dc_lenet_ex23_lr1e-5
+##  Nodelist : gpu1401
+##      CPUs : 
+##  Mem/Node : 16384 MB
+## Directory : /oscar/home/bspiegel/DeepCompose/experiments/run_scripts
+##   Job Started : Sun Jun 25 11:12:11 EDT 2023
+###############################################################################
+module: loading 'anaconda/2022.05'
+module: anaconda: "See https://docs.ccv.brown.edu/oscar/software/anaconda for potential issues on VNC and batch jobs"
+module: loading 'cuda/7.5.18'
+2023-06-25 11:12:17.402839: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-06-25 11:12:18.850002: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+Epoch 1 training: 2023-06-25 11:12:22
+Average loss: 0.22996002435684204
+Training Accuracy ===========
+Total accuracy: 0.11756666666666667
+Per-digit acc:  [0.74933333 0.77613333 0.59916667 0.58086667 0.70503333]
+Test A Accuracy =============
+Total accuracy: 0.107
+Per-digit acc:  [0.739  0.77   0.5614 0.5646 0.7092]
+Test B Accuracy =============
+Total accuracy: 0.0004
+Per-digit acc:  [0.4524 0.464  0.234  0.3456 0.3724]
+Epoch 2 training: 2023-06-25 11:13:20
+Average loss: 0.19120262563228607
+Training Accuracy ===========
+Total accuracy: 0.18883333333333333
+Per-digit acc:  [0.78473333 0.83886667 0.64536667 0.62563333 0.73953333]
+Test A Accuracy =============
+Total accuracy: 0.1598
+Per-digit acc:  [0.7718 0.8276 0.6006 0.5932 0.7334]
+Test B Accuracy =============
+Total accuracy: 0.0044
+Per-digit acc:  [0.433  0.7014 0.2946 0.4334 0.4798]
+Epoch 3 training: 2023-06-25 11:14:11
+Average loss: 0.171408012509346
+Training Accuracy ===========
+Total accuracy: 0.24863333333333335
+Per-digit acc:  [0.82666667 0.878      0.67996667 0.66073333 0.76916667]
+Test A Accuracy =============
+Total accuracy: 0.2024
+Per-digit acc:  [0.7968 0.865  0.6224 0.6222 0.756 ]
+Test B Accuracy =============
+Total accuracy: 0.0132
+Per-digit acc:  [0.5576 0.7154 0.4448 0.4388 0.4774]
+Epoch 4 training: 2023-06-25 11:15:01
+Average loss: 0.1546771228313446
+Training Accuracy ===========
+Total accuracy: 0.3092666666666667
+Per-digit acc:  [0.8447     0.90063333 0.72573333 0.6927     0.80523333]
+Test A Accuracy =============
+Total accuracy: 0.242
+Per-digit acc:  [0.8112 0.8874 0.6614 0.6542 0.7904]
+Test B Accuracy =============
+Total accuracy: 0.0192
+Per-digit acc:  [0.515  0.7728 0.3864 0.4588 0.5862]
+Epoch 5 training: 2023-06-25 11:15:51
+Average loss: 0.13981492817401886
+Training Accuracy ===========
+Total accuracy: 0.3778666666666667
+Per-digit acc:  [0.8678     0.92033333 0.7619     0.73026667 0.83193333]
+Test A Accuracy =============
+Total accuracy: 0.3004
+Per-digit acc:  [0.835  0.9036 0.698  0.676  0.8168]
+Test B Accuracy =============
+Total accuracy: 0.0298
+Per-digit acc:  [0.5508 0.8214 0.3632 0.5644 0.6042]
+Epoch 6 training: 2023-06-25 11:16:40
+Average loss: 0.12623576819896698
+Training Accuracy ===========
+Total accuracy: 0.4326333333333333
+Per-digit acc:  [0.8844     0.92813333 0.79293333 0.76113333 0.8418    ]
+Test A Accuracy =============
+Total accuracy: 0.3398
+Per-digit acc:  [0.8482 0.9106 0.7242 0.6998 0.8188]
+Test B Accuracy =============
+Total accuracy: 0.0522
+Per-digit acc:  [0.676  0.8232 0.4114 0.6618 0.5656]
+Epoch 7 training: 2023-06-25 11:17:31
+Average loss: 0.11412873864173889
+Training Accuracy ===========
+Total accuracy: 0.49803333333333333
+Per-digit acc:  [0.90003333 0.94146667 0.8206     0.79206667 0.86693333]
+Test A Accuracy =============
+Total accuracy: 0.3754
+Per-digit acc:  [0.8552 0.9184 0.7562 0.7202 0.8334]
+Test B Accuracy =============
+Total accuracy: 0.076
+Per-digit acc:  [0.6768 0.8516 0.432  0.7172 0.6328]
+Epoch 8 training: 2023-06-25 11:18:22
+Average loss: 0.10333652049303055
+Training Accuracy ===========
+Total accuracy: 0.5445333333333333
+Per-digit acc:  [0.9155     0.9481     0.84443333 0.81486667 0.8831    ]
+Test A Accuracy =============
+Total accuracy: 0.412
+Per-digit acc:  [0.8676 0.9268 0.7742 0.7448 0.8514]
+Test B Accuracy =============
+Total accuracy: 0.0976
+Per-digit acc:  [0.6542 0.8676 0.5146 0.6934 0.6634]
+Epoch 9 training: 2023-06-25 11:19:12
+Average loss: 0.09401381015777588
+Training Accuracy ===========
+Total accuracy: 0.5658
+Per-digit acc:  [0.91953333 0.94326667 0.86153333 0.83186667 0.8823    ]
+Test A Accuracy =============
+Total accuracy: 0.4236
+Per-digit acc:  [0.8708 0.9178 0.793  0.7568 0.84  ]
+Test B Accuracy =============
+Total accuracy: 0.128
+Per-digit acc:  [0.705  0.8332 0.52   0.6982 0.7454]
+Epoch 10 training: 2023-06-25 11:20:02
+Average loss: 0.08557726442813873
+Training Accuracy ===========
+Total accuracy: 0.6157666666666667
+Per-digit acc:  [0.92856667 0.9591     0.87866667 0.84973333 0.9017    ]
+Test A Accuracy =============
+Total accuracy: 0.4612
+Per-digit acc:  [0.8746 0.9368 0.8076 0.782  0.8616]
+Test B Accuracy =============
+Total accuracy: 0.1152
+Per-digit acc:  [0.6384 0.8982 0.551  0.7264 0.6692]
+Epoch 11 training: 2023-06-25 11:20:52
+Average loss: 0.07829582691192627
+Training Accuracy ===========
+Total accuracy: 0.6495333333333333
+Per-digit acc:  [0.93443333 0.9586     0.89243333 0.8717     0.90936667]
+Test A Accuracy =============
+Total accuracy: 0.4736
+Per-digit acc:  [0.8782 0.931  0.8184 0.791  0.8654]
+Test B Accuracy =============
+Total accuracy: 0.1314
+Per-digit acc:  [0.6346 0.8658 0.5372 0.7962 0.7084]
+Epoch 12 training: 2023-06-25 11:21:43
+Average loss: 0.07179084420204163
+Training Accuracy ===========
+Total accuracy: 0.6780666666666667
+Per-digit acc:  [0.94373333 0.96483333 0.89903333 0.8807     0.9178    ]
+Test A Accuracy =============
+Total accuracy: 0.5062
+Per-digit acc:  [0.8872 0.9366 0.8302 0.8084 0.8686]
+Test B Accuracy =============
+Total accuracy: 0.1754
+Per-digit acc:  [0.7492 0.882  0.6194 0.7414 0.6994]
+Epoch 13 training: 2023-06-25 11:22:34
+Average loss: 0.06609459966421127
+Training Accuracy ===========
+Total accuracy: 0.707
+Per-digit acc:  [0.9534     0.97033333 0.91286667 0.8911     0.92266667]
+Test A Accuracy =============
+Total accuracy: 0.5268
+Per-digit acc:  [0.8948 0.941  0.841  0.8178 0.8754]
+Test B Accuracy =============
+Total accuracy: 0.1516
+Per-digit acc:  [0.7166 0.8944 0.5686 0.7558 0.6922]
+Epoch 14 training: 2023-06-25 11:23:25
+Average loss: 0.06107141450047493
+Training Accuracy ===========
+Total accuracy: 0.7202666666666667
+Per-digit acc:  [0.95183333 0.96796667 0.9185     0.9022     0.92736667]
+Test A Accuracy =============
+Total accuracy: 0.535
+Per-digit acc:  [0.8908 0.9448 0.8464 0.8294 0.873 ]
+Test B Accuracy =============
+Total accuracy: 0.1282
+Per-digit acc:  [0.664  0.9192 0.5154 0.7546 0.6968]
+Epoch 15 training: 2023-06-25 11:24:18
+Average loss: 0.056276172399520874
+Training Accuracy ===========
+Total accuracy: 0.7582666666666666
+Per-digit acc:  [0.9636     0.9754     0.92826667 0.91143333 0.9388    ]
+Test A Accuracy =============
+Total accuracy: 0.5572
+Per-digit acc:  [0.8978 0.9476 0.857  0.8378 0.8804]
+Test B Accuracy =============
+Total accuracy: 0.1674
+Per-digit acc:  [0.719  0.9046 0.5664 0.768  0.7232]
+Epoch 16 training: 2023-06-25 11:25:09
+Average loss: 0.05202355608344078
+Training Accuracy ===========
+Total accuracy: 0.7847333333333333
+Per-digit acc:  [0.96843333 0.97633333 0.9365     0.9243     0.9433    ]
+Test A Accuracy =============
+Total accuracy: 0.576
+Per-digit acc:  [0.9028 0.9478 0.86   0.848  0.8828]
+Test B Accuracy =============
+Total accuracy: 0.217
+Per-digit acc:  [0.743  0.9064 0.5942 0.8216 0.7446]
+Epoch 17 training: 2023-06-25 11:26:00

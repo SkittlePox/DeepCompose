@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --mem=16G
 #SBATCH -t 1:00:00
-#SBATCH -J dc_test
-#SBATCH -p gpu --gres=gpu:1
-#SBATCH -o slurm-dc_lenet_ex23_lr1e-6-%j.out
+#SBATCH -J dc_lenet_ex23_lr1e-6
+#SBATCH -p 3090-gcondo --gres=gpu:1
+#SBATCH -o out/slurm-dc_lenet_ex23_lr1e-6-%j.out
 
 module load anaconda/2022.05
 module load cuda

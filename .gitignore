@@ -139,3 +139,5 @@ propositions.pt
 */saved_models/
 
 */runs/
+
+*.out

@@ -1,0 +1,16 @@
+## SLURM PROLOG ###############################################################
+##    Job ID : 10275980
+##  Job Name : dc_smallnet_ex2
+##  Nodelist : gpu2102
+##      CPUs : 
+##  Mem/Node : 16384 MB
+## Directory : /oscar/home/bspiegel/DeepCompose/experiments/run_scripts
+##   Job Started : Sun Jun 25 11:25:13 EDT 2023
+###############################################################################
+module: loading 'anaconda/2022.05'
+module: anaconda: "See https://docs.ccv.brown.edu/oscar/software/anaconda for potential issues on VNC and batch jobs"
+module: loading 'cuda/7.5.18'
+2023-06-25 11:25:22.659142: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-06-25 11:25:26.409006: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+Epoch 1 training: 2023-06-25 11:25:34

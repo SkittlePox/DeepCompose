@@ -3,7 +3,7 @@
 #SBATCH -t 0:05:00
 #SBATCH -J dc_test
 #SBATCH -p gpu --gres=gpu:1
-#SBATCH -o slurm-dc_test-%j.out
+#SBATCH -o out/slurm-dc_test-%j.out
 
 module load anaconda/2022.05
 module load cuda
