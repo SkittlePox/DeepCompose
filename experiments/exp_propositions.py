@@ -459,7 +459,7 @@ def propositional_logic_experiment_clevr(epochs=1, batch_size=128, save=False):
         torch.save(model, 'saved_models/proposition_primitives_0.pt')
 
 
-def propositional_logic_experiment_emnist(dataset, architecture, additional_comment="", epochs=1, batch_size=64, learning_rate=1e-6, save=False, use_saved=False, prog_bar=False, device="cuda", mini=False):
+def propositional_logic_experiment_emnist(dataset, architecture, additional_comment="", epochs=1, batch_size=64, learning_rate=1e-6, save=False, use_saved=False, verbose=False, device="cuda", mini=False):
     if len(additional_comment) > 0:
         additional_comment = "_"+additional_comment
     comment = f"_{dataset}_{architecture}_{str(epochs)}epochs_batch{str(batch_size)}_lr{learning_rate}{additional_comment}"
@@ -496,7 +496,7 @@ def propositional_logic_experiment_emnist(dataset, architecture, additional_comm
     test_a_loader = DataLoader(test_a_dataset, batch_size=batch_size, shuffle=True)
     test_b_loader = DataLoader(test_b_dataset, batch_size=batch_size, shuffle=True)
 
-    _, losses = train_with_eval(model, train_loader, test_a_loader, test_b_loader, lr=learning_rate, num_epochs=epochs, writer=writer, device=device, prog_bar=prog_bar)
+    _, losses = train_with_eval(model, train_loader, test_a_loader, test_b_loader, lr=learning_rate, num_epochs=epochs, writer=writer, device=device, prog_bar=verbose)
     writer.close()
 
     if save:
@@ -531,6 +531,7 @@ if __name__ == "__main__":
     parser.add_argument('-s','--save', help='Save the model', required=False, default=False, type=bool)
     parser.add_argument('-u','--use_saved', help='Use a saved model', required=False, default=False, type=bool)
     parser.add_argument('-d','--device', help='Device to use', required=False, default='cuda', type=str)    
+    parser.add_argument('-v', '--verbose', help="Verbose, print tqdm progress bar", required=False, default=False, type=bool)
     parser.add_argument('-c','--additional_comment', help='Additional comments save', required=False, default='', type=str)
 
     args = vars(parser.parse_args())

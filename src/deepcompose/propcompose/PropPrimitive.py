@@ -75,6 +75,29 @@ class PropositionalPrimitive(nn.Module):
                 nn.Sigmoid()
             )
 
+        elif architecture == "crazy":
+            self.semantics = nn.Sequential( 
+                nn.Conv2d(1, 32, kernel_size=7, padding=3),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.BatchNorm2d(32),
+                nn.Conv2d(32, 64, kernel_size=7, padding=3),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.BatchNorm2d(64),
+                nn.Conv2d(64, 128, kernel_size=7, padding=3),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.BatchNorm2d(128),
+                nn.Flatten(),
+                nn.Dropout(0.5),
+                nn.Linear(128 * 7 * 7, 64),
+                nn.ReLU(),
+                nn.Dropout(0.5),
+                nn.Linear(64, 1),
+                nn.Sigmoid()
+            )
+
         self.digit = digit
 
     def forward(self, x):
