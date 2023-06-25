@@ -14,6 +14,8 @@ from utils import *
 from tqdm import tqdm
 import torch.nn as nn
 
+from datetime import datetime
+
 from torch.utils.tensorboard import SummaryWriter
 
 # fstring = "../../extended-mnist/output/"                   # Local
@@ -72,7 +74,7 @@ def train(model, dataloader, num_epochs, plot=True, device="cuda"):
     return model, losses
 
 
-def train_with_eval(model, train_dataloader, test_a_dataloader, test_b_dataloader, num_epochs, writer, device="cuda"):
+def train_with_eval(model, train_dataloader, test_a_dataloader, test_b_dataloader, num_epochs, writer, lr=1e-6, prog_bar=True, device="cuda"):
     """
     :param torch.nn.Module model: the model to be trained
     :param torch.utils.data.DataLoader train_dataloader: DataLoader containing training examples
@@ -84,19 +86,21 @@ def train_with_eval(model, train_dataloader, test_a_dataloader, test_b_dataloade
     :return torch.nn.Module model
     """
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.000001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     mse_loss = nn.MSELoss()
     # mae_loss = nn.L1Loss()
     model.to(device)
-    model.train()
 
     losses = []
 
     for epoch in range(num_epochs):
-        print(f"Epoch {epoch + 1} training:")
-        progress_bar = tqdm(range(len(train_dataloader)))
+        print(f"Epoch {epoch + 1} training: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        if prog_bar:
+            progress_bar = tqdm(range(len(train_dataloader)))
         average_loss = 0.0
+
+        model.train()
 
         for i, batch in enumerate(train_dataloader):
             X, y = batch[0].to(device), batch[1].to(device)
@@ -105,20 +109,25 @@ def train_with_eval(model, train_dataloader, test_a_dataloader, test_b_dataloade
             pred = model(X)
 
             loss = mse_loss(pred, y)
-            progress_bar.update(1)
             average_loss += loss
 
             loss.backward()
             # nn.utils.clip_grad_norm_(model.parameters(), 5)
             optimizer.step()
 
+            if prog_bar:
+                progress_bar.update(1)
+
         print(f"Average loss: {average_loss / len(train_dataloader)}")
         writer.add_scalar("Loss/train", loss, epoch)
 
         # Now perform evaluation loop
-        train_accuracy, train_accuracy_digitwise = evaluate(model, train_dataloader, device=device)
-        test_a_accuracy, test_a_accuracy_digitwise = evaluate(model, test_a_dataloader, device=device)
-        test_b_accuracy, test_b_accuracy_digitwise = evaluate(model, test_b_dataloader, device=device)
+        print("Training Accuracy ===========")
+        train_accuracy, train_accuracy_digitwise = evaluate(model, train_dataloader, prog_bar=prog_bar, device=device)
+        print("Test A Accuracy =============")
+        test_a_accuracy, test_a_accuracy_digitwise = evaluate(model, test_a_dataloader, prog_bar=prog_bar, device=device)
+        print("Test B Accuracy =============")
+        test_b_accuracy, test_b_accuracy_digitwise = evaluate(model, test_b_dataloader, prog_bar=prog_bar, device=device)
 
         writer.add_scalars("OverallAccuracy/test_aggregate", {'test_a': test_a_accuracy, 'test_b': test_b_accuracy}, epoch)
         writer.add_scalar("OverallAccuracy/train", train_accuracy, epoch)
@@ -147,7 +156,7 @@ def train_with_eval(model, train_dataloader, test_a_dataloader, test_b_dataloade
 
     return model, losses
 
-def evaluate(model, dataloader, device="cuda"):
+def evaluate(model, dataloader, prog_bar=True, device="cuda"):
     """ Evaluate a PyTorch Model
 
     :param torch.nn.Module model: the model to be evaluated
@@ -160,9 +169,10 @@ def evaluate(model, dataloader, device="cuda"):
     model.to(device)
     model.eval()
 
-    print("Evaluating:")
-
-    progress_bar = tqdm(range(len(dataloader)))
+    # print(f"Evaluating...")
+    
+    if prog_bar:
+        progress_bar = tqdm(range(len(dataloader)))
 
     total_accuracy = None
     digitwise_accuracy = None
@@ -187,15 +197,16 @@ def evaluate(model, dataloader, device="cuda"):
         
         # print(total_accuracy.shape)
 
-        progress_bar.update(1)
+        if prog_bar:
+            progress_bar.update(1)
 
     # print(total_accuracy)
     # print(digitwise_accuracy)
 
     total_accuracy /= len(dataloader.dataset)
     digitwise_accuracy /= len(dataloader.dataset)
-    print(total_accuracy)
-    print(digitwise_accuracy)
+    print("Total accuracy:", total_accuracy)
+    print("Per-digit acc: ", digitwise_accuracy)
 
     return total_accuracy, digitwise_accuracy
 
@@ -448,21 +459,21 @@ def propositional_logic_experiment_clevr(epochs=1, batch_size=128, save=False):
         torch.save(model, 'saved_models/proposition_primitives_0.pt')
 
 
-def propositional_logic_experiment_emnist(dataset, architecture, additional_comment="", epochs=1, batch_size=64, save=False, use_saved=False, device="cuda", mini=False):
-    comment = "exclude23b_10epochs_smallnet_test"
+def propositional_logic_experiment_emnist(dataset, architecture, additional_comment="", epochs=1, batch_size=64, learning_rate=1e-6, save=False, use_saved=False, prog_bar=False, device="cuda", mini=False):
+    if len(additional_comment) > 0:
+        additional_comment = "_"+additional_comment
+    comment = f"_{dataset}_{architecture}_{str(epochs)}epochs_batch{str(batch_size)}_lr{learning_rate}{additional_comment}"
     writer = SummaryWriter(comment=comment)
-    # dataset = "exclude23b"
 
-    
-    # Create a PropositionPrimitive for each digit 0-4
 
     if use_saved:
         model = torch.load("saved_models/emnist_proposition_primitives_0.pt")
         model.to('cpu')
     else:
+        # Create a PropositionPrimitive for each digit 0-4
         primitives = []
         for i in range(5):
-            primitives.append(dc.PropositionalPrimitive(i), architecture=architecture)
+            primitives.append(dc.PropositionalPrimitive(i, architecture=architecture))
         
         model = dc.PropositionPrimitiveCollection(primitives)
 
@@ -485,12 +496,12 @@ def propositional_logic_experiment_emnist(dataset, architecture, additional_comm
     test_a_loader = DataLoader(test_a_dataset, batch_size=batch_size, shuffle=True)
     test_b_loader = DataLoader(test_b_dataset, batch_size=batch_size, shuffle=True)
 
-    _, losses = train_with_eval(model, train_loader, test_a_loader, test_b_loader, num_epochs=epochs, writer=writer, device=device)
+    _, losses = train_with_eval(model, train_loader, test_a_loader, test_b_loader, lr=learning_rate, num_epochs=epochs, writer=writer, device=device, prog_bar=prog_bar)
     writer.close()
 
     if save:
         model.to('cpu')
-        torch.save(model, f'saved_models/emnist_proposition_primitives_{comment}.pt')
+        torch.save(model, f'saved_models/emnist_proposition_primitives{comment}.pt')
 
 
 # List of datasets:
@@ -510,23 +521,20 @@ if __name__ == "__main__":
     # probe()
     # taxi_example()
 
-    parser = argparse.ArgumentParser(description='Description of your program')
+    parser = argparse.ArgumentParser(description='DeepCompose Propositional Logic Experiment')
     parser.add_argument('-a','--architecture', help='Architecture to use', required=True, default='smallnet', type=str)
     parser.add_argument('-ds','--dataset', help='Dataset to use', required=True, default='exclude23b', type=str)
     
     parser.add_argument('-e','--epochs', help='Number of epochs to train for', required=False, default=50, type=int)
     parser.add_argument('-b','--batch_size', help='Batch size', required=False, default=64, type=int)
+    parser.add_argument('-lr','--learning_rate', help='Learning rate', required=False, default=1e-6, type=float)
     parser.add_argument('-s','--save', help='Save the model', required=False, default=False, type=bool)
     parser.add_argument('-u','--use_saved', help='Use a saved model', required=False, default=False, type=bool)
     parser.add_argument('-d','--device', help='Device to use', required=False, default='cuda', type=str)    
     parser.add_argument('-c','--additional_comment', help='Additional comments save', required=False, default='', type=str)
 
-
     args = vars(parser.parse_args())
-
-    print(args)
-
-    # propositional_logic_experiment_emnist(**args)
+    propositional_logic_experiment_emnist(**args)
 
     
     
