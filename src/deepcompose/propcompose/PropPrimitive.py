@@ -118,7 +118,7 @@ class PropositionalPrimitive(nn.Module):
                 nn.BatchNorm2d(256),
                 nn.Flatten(),
                 nn.Dropout(0.5),
-                nn.Linear(256 * 4 * 4, 1),
+                nn.Linear(256 * 3 * 3, 1),
                 nn.Sigmoid()
             )
 
