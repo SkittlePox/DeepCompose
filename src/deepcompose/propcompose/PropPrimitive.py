@@ -98,6 +98,31 @@ class PropositionalPrimitive(nn.Module):
                 nn.Sigmoid()
             )
 
+        elif architecture == "nutty":
+            self.semantics = nn.Sequential(
+                nn.Conv2d(1, 32, kernel_size=7, padding=3),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.BatchNorm2d(32),
+                nn.Conv2d(32, 64, kernel_size=7, padding=3),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.BatchNorm2d(64),
+                nn.Conv2d(64, 128, kernel_size=7, padding=3),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.BatchNorm2d(128),
+                nn.Conv2d(128, 256, kernel_size=7, padding=3),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.BatchNorm2d(256),
+                nn.Flatten(),
+                nn.Dropout(0.5),
+                nn.Linear(256 * 4 * 4, 1),
+                nn.Sigmoid()
+            )
+
+
         self.digit = digit
 
     def forward(self, x):
