@@ -12,6 +12,6 @@ conda activate deepcompose
 
 cd ..
 
-python3 -u exp_propositions.py -a smallnet -ds exclude04b -e 50
+python3 -u exp_propositions.py -a smallnet -ds exclude04b -e 50 -s True
 
 conda deactivate
