@@ -28,49 +28,53 @@ class OldPropositionalPrimitive(nn.Module):
 class PropositionalPrimitive(nn.Module):
     """Just like OldPropositionalPrimitive, but it takes in a 60 by 60 grayscale image and outputs a 1 dimensional output."""
 
-    def __init__(self, digit):
+    def __init__(self, digit, architecture="smallnet"):
         super().__init__()
 
-        # self.semantics = nn.Sequential(       # These may be too powerful for our purposes.
-        #     nn.Conv2d(1, 32, kernel_size=3, stride=1),
-        #     nn.ReLU(),
-        #     nn.MaxPool2d(kernel_size=2, stride=2),
-        #     nn.Conv2d(32, 64, kernel_size=3, stride=1),
-        #     nn.ReLU(),
-        #     nn.MaxPool2d(kernel_size=2, stride=2),
-        #     nn.Flatten(),
-        #     nn.Linear(13 * 13 * 64, 256),
-        #     nn.ReLU(),
-        #     nn.Linear(256, 1),
-        #     nn.Sigmoid()
-        # )
+        if architecture == "old":
+            self.semantics = nn.Sequential(       # These may be too powerful for our purposes.
+                nn.Conv2d(1, 32, kernel_size=3, stride=1),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Conv2d(32, 64, kernel_size=3, stride=1),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Flatten(),
+                nn.Linear(13 * 13 * 64, 256),
+                nn.ReLU(),
+                nn.Linear(256, 1),
+                nn.Sigmoid()
+            )
 
-        # self.semantics = nn.Sequential(       # These are too weak
-        #     nn.Conv2d(1, 32, kernel_size=3, stride=1),
-        #     nn.ReLU(),
-        #     nn.MaxPool2d(kernel_size=2, stride=2),
-        #     nn.Flatten(),
-        #     nn.Linear(29 * 29 * 32, 256),
-        #     nn.ReLU(),
-        #     nn.Linear(256, 1),
-        #     nn.Sigmoid()
-        # )
+        elif architecture == "smallnet":
+            self.semantics = nn.Sequential(       # These are weak - smallnet
+                nn.Conv2d(1, 32, kernel_size=3, stride=1),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Flatten(),
+                nn.Linear(29 * 29 * 32, 256),
+                nn.ReLU(),
+                nn.Linear(256, 1),
+                nn.Sigmoid()
+            )
 
-        self.semantics = nn.Sequential(         # This is almost LeNet
-            nn.Conv2d(1, 6, kernel_size=5),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(6, 16, kernel_size=5),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Flatten(),
-            nn.Linear(16 * 12 * 12, 120),
-            nn.ReLU(),
-            nn.Linear(120, 84),
-            nn.ReLU(),
-            nn.Linear(84, 1),
-            nn.Sigmoid()
-        )
+        elif architecture == "lenet":
+            self.semantics = nn.Sequential(         # This is almost LeNet - lenet
+                nn.Conv2d(1, 6, kernel_size=5),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Conv2d(6, 16, kernel_size=5),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Flatten(),
+                nn.Linear(16 * 12 * 12, 120),
+                nn.ReLU(),
+                nn.Linear(120, 84),
+                nn.ReLU(),
+                nn.Linear(84, 1),
+                nn.Sigmoid()
+            )
+
         self.digit = digit
 
     def forward(self, x):
