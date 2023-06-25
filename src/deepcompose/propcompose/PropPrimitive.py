@@ -31,8 +31,8 @@ class PropositionalPrimitive(nn.Module):
     def __init__(self, digit, architecture="smallnet"):
         super().__init__()
 
-        if architecture == "old":
-            self.semantics = nn.Sequential(       # These may be too powerful for our purposes.
+        if architecture == "beefy":
+            self.semantics = nn.Sequential(       # These may be too powerful - beefy
                 nn.Conv2d(1, 32, kernel_size=3, stride=1),
                 nn.ReLU(),
                 nn.MaxPool2d(kernel_size=2, stride=2),
